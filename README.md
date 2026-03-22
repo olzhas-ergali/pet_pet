@@ -2,6 +2,23 @@
 
 Vite + React + Supabase (Postgres, Auth, Realtime).
 
+## Git-ветки
+
+| Ветка | Назначение |
+|-------|------------|
+| `test` | Ручные проверки, QA, стабилизация перед слиянием в `dev`. |
+| `dev` | Ежедневная разработка; feature-ветки сливаются сюда. |
+| `main` | Релизы / демо для инвесторов; только проверенный код (из `dev` или `test`). |
+
+Поток: **feature → `dev` → (при необходимости) `test` → `main`**. На GitHub уже созданы три ветки с общим начальным коммитом.
+
+```bash
+git checkout dev
+git pull origin dev
+# после работы:
+git push origin dev
+```
+
 ## Быстрый старт
 
 1. Создайте проект в [Supabase](https://supabase.com), включите **Phone** auth (или используйте email/password для демо).

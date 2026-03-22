@@ -1,0 +1,40 @@
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { motion } from 'motion/react';
+import { Globe } from 'lucide-react';
+import { SUPPORTED_LANGUAGES, type AppLanguage } from '@/i18n';
+
+export function LanguageSwitcher({ className = '' }: { className?: string }) {
+  const { i18n, t } = useTranslation();
+  const [pulse, setPulse] = useState(0);
+
+  const current = (i18n.resolvedLanguage ?? 'ru').split('-')[0] as AppLanguage;
+
+  useEffect(() => {
+    setPulse((k) => k + 1);
+  }, [i18n.language]);
+
+  return (
+    <label className={`flex items-center gap-2 ${className}`}>
+      <Globe className="w-4 h-4 shrink-0 text-gray-500" aria-hidden />
+      <span className="hidden sm:inline text-sm text-gray-600">{t('language.label')}</span>
+      <motion.div
+        key={pulse}
+        initial={{ opacity: 0.75, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <select
+          className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+          value={SUPPORTED_LANGUAGES.includes(current) ? current : 'ru'}
+          onChange={(e) => void i18n.changeLanguage(e.target.value as AppLanguage)}
+          aria-label={t('language.label')}
+        >
+          <option value="kk">{t('language.kk')}</option>
+          <option value="ru">{t('language.ru')}</option>
+          <option value="en">{t('language.en')}</option>
+        </select>
+      </motion.div>
+    </label>
+  );
+}

@@ -1,0 +1,42 @@
+services:
+  bff:
+    build:
+      context: .
+      dockerfile: Dockerfile.bff
+    ports:
+      - "3001:3001"
+    environment:
+      SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+      WEBHOOK_FORWARD_URL: ${WEBHOOK_FORWARD_URL:-}
+      INTERNAL_WEBHOOK_SECRET: ${INTERNAL_WEBHOOK_SECRET:-}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  # Локальный Postgres (опционально). Полный Realtime/Auth — через Supabase Cloud или `supabase start`.
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: optbirja
+      POSTGRES_PASSWORD: optbirja
+      POSTGRES_DB: optbirja
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    profiles:
+      - db
+
+volumes:
+  pgdata:

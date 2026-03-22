@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+*.local
+
+# Environment (secrets)
+.env
+.env.local
+.env.*.local
+server/.env
+server/.env.local
+
+# Logs & cache
+npm-debug.log*
+.pnpm-debug.log*
+.cache/
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Test / coverage
+coverage/
+
+# Supabase local (optional)
+.branches/
+.temp/

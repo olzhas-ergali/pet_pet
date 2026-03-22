@@ -1,5 +1,7 @@
 import type { ComponentType } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createElement } from 'react';
+import { createBrowserRouter, Navigate } from 'react-router';
+import { DEFAULT_ROUTE_LANG } from '@/i18n/langRouting';
 import { LangLayout } from './layout/LangLayout';
 import { PublicLayout } from './layout/PublicLayout';
 import { ProtectedLayout } from './layout/ProtectedLayout';
@@ -25,6 +27,13 @@ function lazyPage<T extends Record<string, ComponentType<object>>>(
 
 export const router = createBrowserRouter([
   { path: '/', Component: RootRedirect },
+  {
+    path: '/auth',
+    element: createElement(Navigate, {
+      to: `/${DEFAULT_ROUTE_LANG}/auth`,
+      replace: true,
+    }),
+  },
   {
     path: '/:lang',
     Component: LangLayout,

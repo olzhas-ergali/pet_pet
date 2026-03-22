@@ -8,6 +8,7 @@ import i18n from '@/i18n';
 /**
  * Подписка на изменения заказов (RLS: свой заказ, заказы с товарами поставщика, админ — все).
  * @param enabled — как у usePricesRealtime: не подписываться, пока нет сессии / не готов layout.
+ * При смене `user`, выходе (null) или `enabled === false` срабатывает cleanup → removeChannel (нет «висящих» каналов).
  */
 export function useOrdersRealtime(enabled = true) {
   const user = useAuthStore((s) => s.user);
@@ -16,8 +17,9 @@ export function useOrdersRealtime(enabled = true) {
   useEffect(() => {
     if (!enabled || !isSupabaseConfigured || !user) return;
     const supabase = getSupabase()!;
+    const userId = user.id;
     const ch = supabase
-      .channel(`orders_feed_${user.id}`)
+      .channel(`orders_feed_${userId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },
@@ -42,5 +44,6 @@ export function useOrdersRealtime(enabled = true) {
       if (toastDebounce.current) clearTimeout(toastDebounce.current);
       void supabase.removeChannel(ch);
     };
-  }, [enabled, user?.id, user?.role]);
+    // `user` целиком: смена id/роли/объекта профиля → новый канал; null → только cleanup
+  }, [enabled, user]);
 }

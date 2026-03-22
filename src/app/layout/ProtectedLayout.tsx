@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
+import { useRouteLang } from '@/hooks/useLocalizedPath';
 import { usePricesRealtime } from '@/hooks/usePricesRealtime';
 import { useOrdersRealtime } from '@/hooks/useOrdersRealtime';
 import { SessionSplash } from '../components/SessionSplash';
@@ -19,8 +20,8 @@ export function ProtectedLayout() {
   useOrdersRealtime(canPriceRealtime);
   const navigate = useNavigate();
   const loc = useLocation();
-  const { lang } = useParams<{ lang: string }>();
-  const authPath = lang ? `/${lang}/auth` : '/ru/auth';
+  const routeLang = useRouteLang();
+  const authPath = `/${routeLang}/auth`;
 
   useEffect(() => {
     if (!ready || !isSupabaseConfigured) return;

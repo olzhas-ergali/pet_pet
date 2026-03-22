@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { TrendingUp, ArrowRight } from 'lucide-react';
+import { ArrowRight, Package } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import {
@@ -169,58 +169,84 @@ export function Auth() {
     return <SessionSplash />;
   }
 
+  const stepPill = (active: boolean) =>
+    `rounded-full px-3 py-1 text-xs font-semibold tracking-wide transition-colors ${
+      active
+        ? 'bg-emerald-600 text-white shadow-sm shadow-emerald-600/25'
+        : 'bg-stone-100 text-stone-500 dark:bg-white/5 dark:text-stone-500'
+    }`;
+
   return (
-    <div className="min-h-screen flex flex-col px-4 pb-12">
-      <div className="flex justify-end pt-4 pb-2">
-        <div className="rounded-full border border-gray-200 dark:border-white/10 bg-white/90 dark:bg-black/30 px-2 py-1 shadow-sm dark:shadow-none backdrop-blur-md">
-          <LanguageSwitcher className="[&_span]:text-gray-600 dark:[&_span]:text-stone-400 [&_select]:bg-white dark:[&_select]:bg-stone-900 [&_select]:text-gray-900 dark:[&_select]:text-stone-100 [&_select]:border-gray-200 dark:[&_select]:border-white/20 [&_svg]:text-gray-500 dark:[&_svg]:text-stone-400" />
+    <div
+      className="relative min-h-screen flex flex-col px-4 pb-12 text-stone-900 dark:text-stone-100 overflow-hidden"
+      style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}
+    >
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 right-0 h-[420px] w-[420px] rounded-full bg-emerald-400/15 dark:bg-emerald-500/10 blur-3xl" />
+        <div className="absolute bottom-0 -left-24 h-[380px] w-[380px] rounded-full bg-amber-400/12 dark:bg-amber-500/8 blur-3xl" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(0,0,0,0.03),_transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.05),_transparent_50%)]" />
+      </div>
+
+      <div className="relative z-10 flex justify-end pt-4 pb-2">
+        <div className="rounded-full border border-stone-200/90 dark:border-white/10 bg-white/80 dark:bg-zinc-950/70 px-2 py-1 shadow-sm backdrop-blur-xl">
+          <LanguageSwitcher className="[&_span]:text-stone-600 dark:[&_span]:text-stone-400 [&_select]:bg-white dark:[&_select]:bg-stone-900 [&_select]:text-stone-900 dark:[&_select]:text-stone-100 [&_select]:border-stone-200 dark:[&_select]:border-white/20 [&_svg]:text-stone-500 dark:[&_svg]:text-stone-400" />
         </div>
       </div>
-      <div className="flex flex-1 flex-col items-center justify-center px-0 pt-4 pb-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
-        <div className="text-center mb-10">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl mb-6 shadow-lg shadow-amber-500/25"
-          >
-            <TrendingUp className="w-10 h-10 text-stone-950" />
-          </motion.div>
-          <p className="text-gray-600 dark:text-stone-300 text-lg mb-4">{t('auth.tagline')}</p>
-          <Link
-            to={`/${routeLang}`}
-            className="text-sm text-amber-600 dark:text-amber-400/90 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
-          >
-            {t('auth.backToLanding')}
-          </Link>
-        </div>
+
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center pt-2 pb-10">
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-[440px]">
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-600/30 ring-1 ring-white/25">
+              <Package className="h-6 w-6" strokeWidth={2} aria-hidden />
+            </div>
+            <h1
+              className="text-[2rem] sm:text-4xl font-medium tracking-tight text-stone-900 dark:text-white"
+              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            >
+              {t('auth.pageTitle')}
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed max-w-sm mx-auto">
+              {t('auth.pageSubtitle')}
+            </p>
+            <Link
+              to={`/${routeLang}`}
+              className="mt-4 inline-block text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 underline-offset-4 hover:underline"
+            >
+              {t('auth.backToLanding')}
+            </Link>
+          </div>
+
+          <div className="mb-5 flex items-center justify-center gap-2">
+            <span className={stepPill(step === 'phone')} aria-current={step === 'phone' ? 'step' : undefined}>
+              {t('auth.stepPhone')}
+            </span>
+            <span className="h-px w-6 bg-stone-200 dark:bg-white/15" aria-hidden />
+            <span className={stepPill(step === 'otp')} aria-current={step === 'otp' ? 'step' : undefined}>
+              {t('auth.stepOtp')}
+            </span>
+          </div>
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white dark:bg-stone-900/90 border border-gray-200 dark:border-white/10 backdrop-blur-md rounded-3xl p-8 space-y-6 shadow-xl shadow-gray-200/80 dark:shadow-2xl dark:shadow-black/40"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06 }}
+          className="rounded-[1.75rem] border border-stone-200/90 dark:border-white/10 bg-white/90 dark:bg-zinc-950/80 backdrop-blur-xl p-7 sm:p-8 space-y-6 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.45)]"
         >
           {!isSupabaseConfigured && (
-            <div className="text-sm text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 space-y-2">
-              <p>{t('auth.noEnv')}</p>
-              <p className="text-xs leading-relaxed opacity-95">{t('auth.noEnvBff')}</p>
+            <div className="text-sm text-amber-950 dark:text-amber-100 bg-amber-50/95 dark:bg-amber-500/12 border border-amber-200/90 dark:border-amber-500/25 rounded-xl p-4 space-y-2">
+              <p className="font-medium">{t('auth.noEnv')}</p>
+              <p className="text-xs leading-relaxed opacity-90">{t('auth.noEnvBff')}</p>
             </div>
           )}
 
           {!isSupabaseConfigured && isAuthMockEnabled() && (
-            <div className="space-y-3 pb-4 border-b border-gray-200 dark:border-white/10">
-              <p className="text-xs font-semibold text-amber-700 dark:text-amber-400/90 uppercase">{t('auth.demoUiTitle')}</p>
-              <p className="text-xs text-gray-600 dark:text-stone-400 leading-relaxed">{t('auth.demoUiHint')}</p>
+            <div className="space-y-3 pb-5 border-b border-stone-200/80 dark:border-white/10">
+              <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wide">{t('auth.demoUiTitle')}</p>
+              <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">{t('auth.demoUiHint')}</p>
               <button
                 type="button"
                 onClick={handleMockDemo}
-                className="w-full py-3 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-100 font-semibold hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
+                className="w-full py-3.5 rounded-xl bg-amber-100/90 dark:bg-amber-500/18 border border-amber-200 dark:border-amber-500/35 text-amber-950 dark:text-amber-50 font-semibold hover:bg-amber-200/80 dark:hover:bg-amber-500/28 transition-colors"
               >
                 {t('auth.demoUiButton')}
               </button>
@@ -228,29 +254,36 @@ export function Auth() {
           )}
 
           {showDevLogin && (
-            <form onSubmit={handleDevLogin} className="space-y-3 pb-4 border-b border-gray-200 dark:border-white/10">
-              <p className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase">{t('auth.devLogin')}</p>
+            <form onSubmit={handleDevLogin} className="space-y-3 pb-5 border-b border-stone-200/80 dark:border-white/10">
+              <div>
+                <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">{t('auth.devBlockTitle')}</p>
+                <p className="mt-0.5 text-xs text-stone-500 dark:text-stone-500 leading-relaxed">{t('auth.devLogin')}</p>
+              </div>
               {import.meta.env.DEV && (
-                <p className="text-xs text-gray-500 dark:text-stone-500 leading-relaxed">{t('auth.devLoginHint')}</p>
+                <p className="text-xs text-stone-500 dark:text-stone-500 leading-relaxed rounded-xl bg-stone-50 dark:bg-white/[0.04] border border-stone-100 dark:border-white/10 px-3 py-2">
+                  {t('auth.devLoginHint')}
+                </p>
               )}
               <input
                 type="email"
                 value={devE}
                 onChange={(e) => setDevE(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-stone-950 border border-gray-200 dark:border-white/15 text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
+                className="w-full px-4 py-3.5 rounded-xl bg-stone-50/90 dark:bg-black/30 border border-stone-200 dark:border-white/12 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:border-emerald-500/55 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-shadow"
                 placeholder="Email"
+                autoComplete="email"
               />
               <input
                 type="password"
                 value={devP}
                 onChange={(e) => setDevP(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-stone-950 border border-gray-200 dark:border-white/15 text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
+                className="w-full px-4 py-3.5 rounded-xl bg-stone-50/90 dark:bg-black/30 border border-stone-200 dark:border-white/12 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:border-emerald-500/55 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-shadow"
                 placeholder={t('auth.passwordPlaceholder')}
+                autoComplete="current-password"
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-gray-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold hover:bg-gray-800 dark:hover:bg-white disabled:opacity-50 transition-colors"
+                className="w-full py-3.5 rounded-xl bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold hover:bg-stone-800 dark:hover:bg-white disabled:opacity-50 transition-colors"
               >
                 {t('auth.devLoginSubmit')}
               </button>
@@ -260,53 +293,53 @@ export function Auth() {
           {step === 'phone' ? (
             <form onSubmit={handlePhoneSubmit}>
               <div className="mb-6">
-                <p className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase tracking-wide mb-2">
+                <p className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-2">
                   {t('auth.accountTypeLabel')}
                 </p>
                 <div className="grid grid-cols-2 gap-3 mb-1">
                   <button
                     type="button"
                     onClick={() => setAccountType('customer')}
-                    className={`rounded-2xl border px-3 py-3 text-left transition-all ${
+                    className={`rounded-2xl border px-3 py-3.5 text-left transition-all ${
                       accountType === 'customer'
-                        ? 'border-emerald-500/70 bg-emerald-50/90 dark:bg-emerald-500/15 ring-1 ring-emerald-500/40'
-                        : 'border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-stone-950/50 hover:border-gray-300 dark:hover:border-white/20'
+                        ? 'border-emerald-500/75 bg-emerald-50/95 dark:bg-emerald-500/14 ring-2 ring-emerald-500/25'
+                        : 'border-stone-200 dark:border-white/10 bg-stone-50/80 dark:bg-black/25 hover:border-stone-300 dark:hover:border-white/18'
                     }`}
                   >
-                    <span className="block text-sm font-semibold text-gray-900 dark:text-stone-100">
+                    <span className="block text-sm font-semibold text-stone-900 dark:text-stone-100">
                       {t('auth.accountBuyer')}
                     </span>
-                    <span className="block text-xs text-gray-500 dark:text-stone-400 mt-1 leading-snug">
+                    <span className="block text-xs text-stone-500 dark:text-stone-400 mt-1 leading-snug">
                       {t('auth.accountBuyerHint')}
                     </span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setAccountType('supplier')}
-                    className={`rounded-2xl border px-3 py-3 text-left transition-all ${
+                    className={`rounded-2xl border px-3 py-3.5 text-left transition-all ${
                       accountType === 'supplier'
-                        ? 'border-amber-500/70 bg-amber-50/90 dark:bg-amber-500/15 ring-1 ring-amber-500/40'
-                        : 'border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-stone-950/50 hover:border-gray-300 dark:hover:border-white/20'
+                        ? 'border-amber-500/75 bg-amber-50/95 dark:bg-amber-500/14 ring-2 ring-amber-500/25'
+                        : 'border-stone-200 dark:border-white/10 bg-stone-50/80 dark:bg-black/25 hover:border-stone-300 dark:hover:border-white/18'
                     }`}
                   >
-                    <span className="block text-sm font-semibold text-gray-900 dark:text-stone-100">
+                    <span className="block text-sm font-semibold text-stone-900 dark:text-stone-100">
                       {t('auth.accountSeller')}
                     </span>
-                    <span className="block text-xs text-gray-500 dark:text-stone-400 mt-1 leading-snug">
+                    <span className="block text-xs text-stone-500 dark:text-stone-400 mt-1 leading-snug">
                       {t('auth.accountSellerHint')}
                     </span>
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-stone-500 mt-2 leading-relaxed">{t('auth.accountTypeFoot')}</p>
+                <p className="text-xs text-stone-500 dark:text-stone-500 mt-2 leading-relaxed">{t('auth.accountTypeFoot')}</p>
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-stone-300 mb-3">
+                <label className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">
                   {t('auth.phone')}
                 </label>
-                <div className="flex rounded-2xl border border-gray-200 dark:border-white/15 bg-gray-50 dark:bg-stone-950 overflow-hidden transition-colors focus-within:border-emerald-500/60 focus-within:ring-1 focus-within:ring-emerald-500/30">
+                <div className="flex rounded-2xl border border-stone-200 dark:border-white/12 bg-stone-50/90 dark:bg-black/30 overflow-hidden transition-shadow focus-within:border-emerald-500/55 focus-within:ring-2 focus-within:ring-emerald-500/20">
                   <span
-                    className="flex items-center px-4 bg-gray-100 dark:bg-stone-900/85 text-gray-500 dark:text-stone-400 border-r border-gray-200 dark:border-white/10 text-lg font-medium tabular-nums select-none shrink-0"
+                    className="flex items-center px-4 bg-stone-100/90 dark:bg-stone-900/90 text-stone-500 dark:text-stone-400 border-r border-stone-200 dark:border-white/10 text-lg font-medium tabular-nums select-none shrink-0"
                     aria-hidden
                   >
                     +7
@@ -319,7 +352,7 @@ export function Auth() {
                     onChange={(e) => setPhoneNational(extractRuNationalDigits(e.target.value))}
                     placeholder={t('auth.phoneNationalPlaceholder')}
                     aria-label={t('auth.phone')}
-                    className="flex-1 min-w-0 px-4 py-4 bg-transparent focus:outline-none text-lg text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-500"
+                    className="flex-1 min-w-0 px-4 py-4 bg-transparent focus:outline-none text-lg text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500"
                   />
                 </div>
               </div>
@@ -327,7 +360,7 @@ export function Auth() {
               <button
                 type="submit"
                 disabled={loading || !isSupabaseConfigured}
-                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-4 rounded-2xl font-semibold text-base sm:text-lg hover:opacity-[0.97] transition-opacity shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   t('auth.sending')
@@ -341,11 +374,11 @@ export function Auth() {
             </form>
           ) : (
             <form onSubmit={handleOtpSubmit}>
-              <p className="text-xs text-gray-500 dark:text-stone-400 mb-4 text-center">
+              <p className="text-xs text-stone-500 dark:text-stone-400 mb-4 text-center leading-relaxed px-1">
                 {accountType === 'supplier' ? t('auth.otpAsSupplier') : t('auth.otpAsBuyer')}
               </p>
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-stone-300 mb-3">
+                <label className="block text-sm font-semibold text-stone-800 dark:text-stone-200 mb-2">
                   {t('auth.otp')}
                 </label>
                 <input
@@ -354,7 +387,9 @@ export function Auth() {
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="• • • • • •"
                   maxLength={8}
-                  className="w-full px-5 py-4 bg-gray-50 dark:bg-stone-950 border border-gray-200 dark:border-white/15 rounded-2xl focus:border-emerald-500/60 focus:outline-none transition-all text-2xl tracking-widest text-center text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-600"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  className="w-full px-5 py-4 bg-stone-50/90 dark:bg-black/30 border border-stone-200 dark:border-white/12 rounded-2xl focus:border-emerald-500/55 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-shadow text-2xl tracking-[0.35em] text-center text-stone-900 dark:text-stone-100 placeholder:text-stone-300 dark:placeholder:text-stone-600"
                   required
                 />
                 <button
@@ -363,7 +398,7 @@ export function Auth() {
                     setOtp('');
                     setStep('phone');
                   }}
-                  className="text-sm text-gray-500 dark:text-stone-400 mt-3 hover:text-gray-800 dark:hover:text-stone-200"
+                  className="text-sm text-emerald-700 dark:text-emerald-400 mt-3 hover:underline underline-offset-2"
                 >
                   {t('auth.changePhone')}
                 </button>
@@ -372,7 +407,7 @@ export function Auth() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-4 rounded-2xl font-semibold text-base sm:text-lg hover:opacity-[0.97] transition-opacity shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   t('auth.checking')
@@ -387,11 +422,11 @@ export function Auth() {
           )}
         </motion.div>
 
-        <p className="text-center text-sm text-gray-500 dark:text-stone-500 mt-8 max-w-sm mx-auto leading-relaxed">
+        <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-sm mx-auto leading-relaxed">
           {t('auth.terms')}
         </p>
         {import.meta.env.DEV && (
-          <p className="text-center text-xs text-gray-400 dark:text-stone-600 mt-4 max-w-sm mx-auto leading-relaxed">
+          <p className="text-center text-xs text-stone-400 dark:text-stone-600 mt-4 max-w-sm mx-auto leading-relaxed">
             {t('auth.devFullStack')}
           </p>
         )}

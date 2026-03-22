@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'motion/react';
-import { ArrowRight, Sparkles, Radio, Package, ShieldCheck, Truck } from 'lucide-react';
+import { ArrowRight, Sparkles, Layers, Package, ShieldCheck, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { CATEGORY_ID_TO_DB } from '@/lib/catalogCategories';
 import { useLocalizedPath } from '@/hooks/useLocalizedPath';
@@ -57,10 +57,13 @@ export function Landing() {
         />
       </div>
 
-      <header className="relative z-10 border-b border-gray-200/90 dark:border-white/5 bg-white/80 dark:bg-transparent backdrop-blur-md">
-        <div className="container mx-auto px-4 py-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 shadow-lg shadow-amber-500/25" />
+      <header className="relative z-10 border-b border-gray-200/80 dark:border-white/5 bg-white/85 dark:bg-zinc-950/75 backdrop-blur-xl shadow-sm shadow-black/[0.03] dark:shadow-none">
+        <div className="container mx-auto px-4 py-5 md:py-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="h-10 w-10 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 shadow-md shadow-emerald-600/25 ring-1 ring-white/20"
+              aria-hidden
+            />
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-stone-500">
                 {t('landing.brand')}
@@ -151,7 +154,7 @@ export function Landing() {
           <div className="container mx-auto px-4 py-16 md:py-20">
             <div className="grid md:grid-cols-3 gap-10 md:gap-8">
               {[
-                { icon: Radio, titleKey: 'landing.benefit1Title', bodyKey: 'landing.benefit1Body' },
+                { icon: Layers, titleKey: 'landing.benefit1Title', bodyKey: 'landing.benefit1Body' },
                 { icon: Package, titleKey: 'landing.benefit2Title', bodyKey: 'landing.benefit2Body' },
                 { icon: ShieldCheck, titleKey: 'landing.benefit3Title', bodyKey: 'landing.benefit3Body' },
               ].map(({ icon: Icon, titleKey, bodyKey }, i) => (

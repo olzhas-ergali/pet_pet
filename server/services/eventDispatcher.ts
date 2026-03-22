@@ -27,26 +27,35 @@ export async function dispatchPendingIntegrationEvents(limit = 20): Promise<numb
   let done = 0;
   for (const row of rows) {
     let externalStatus = 'skipped';
-    try {
-      if (FORWARD) {
+    let markProcessed = false;
+
+    if (!FORWARD) {
+      externalStatus = 'no_forward_url';
+      markProcessed = true;
+    } else {
+      try {
         const res = await fetch(FORWARD, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ event: row }),
         });
         externalStatus = res.ok ? `forwarded:${res.status}` : `error:${res.status}`;
-      } else {
-        externalStatus = 'no_forward_url';
+        markProcessed = res.ok;
+      } catch (e) {
+        externalStatus = `forward_exception:${(e as Error).message}`;
+        markProcessed = false;
       }
-    } catch (e) {
-      externalStatus = `forward_exception:${(e as Error).message}`;
     }
 
-    await admin
-      .from('integration_events')
-      .update({ processed_at: new Date().toISOString(), external_status: externalStatus })
-      .eq('id', row.id);
-    done += 1;
+    if (markProcessed) {
+      await admin
+        .from('integration_events')
+        .update({ processed_at: new Date().toISOString(), external_status: externalStatus })
+        .eq('id', row.id);
+      done += 1;
+    } else {
+      await admin.from('integration_events').update({ external_status: externalStatus }).eq('id', row.id);
+    }
   }
   return done;
 }

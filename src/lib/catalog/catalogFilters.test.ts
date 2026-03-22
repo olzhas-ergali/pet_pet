@@ -6,13 +6,11 @@ import type { Product } from '@/app/types';
 const baseProduct = (over: Partial<Product>): Product => ({
   id: '1',
   name: 'Test',
-  description: '',
   category: 'Бытовая химия',
   image: '',
   basePrice: 100,
   discountPrice: null,
   currentPrice: 100,
-  oldPrice: null,
   stock: 10,
   discount: 0,
   wholesalePrices: [],

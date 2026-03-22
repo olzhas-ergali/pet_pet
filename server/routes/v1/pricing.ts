@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createUserClient } from '../../lib/supabaseClients.js';
+import { sendInternalError } from '../../lib/httpErrorResponse.js';
 import { unitPriceForQuantity } from '../../domain/catalogMap.js';
 import { deliveryFeeKzt } from '../../domain/delivery.js';
 
@@ -39,7 +40,7 @@ r.post('/quote', async (req, res) => {
     const unit = unitPriceForQuantity(data as never, quantity);
     res.json({ product_id, quantity, unit_price: unit, currency: 'KZT' });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'pricing/quote');
   }
 });
 
@@ -103,7 +104,7 @@ r.post('/cart-quote', async (req, res) => {
       currency: 'KZT',
     });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'pricing/cart-quote');
   }
 });
 

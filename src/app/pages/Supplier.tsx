@@ -30,7 +30,7 @@ export function Supplier() {
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState(CATEGORY_ID_TO_DB.food);
+  const [category, setCategory] = useState<string>(CATEGORY_ID_TO_DB.food);
   const [imageUrl, setImageUrl] = useState(
     'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'
   );

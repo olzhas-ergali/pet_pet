@@ -1,5 +1,6 @@
 import { Router, type Request } from 'express';
 import { createUserClient } from '../../lib/supabaseClients.js';
+import { sendInternalError } from '../../lib/httpErrorResponse.js';
 import { mapDbRowToProduct } from '../../domain/catalogMap.js';
 
 const r = Router();
@@ -25,7 +26,7 @@ r.get('/', async (req, res) => {
     const mapped = (data ?? []).map((row) => mapDbRowToProduct(row as never));
     res.json({ data: mapped });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'products/list');
   }
 });
 
@@ -50,7 +51,7 @@ r.get('/:id', async (req, res) => {
     }
     res.json({ data: mapDbRowToProduct(data as never) });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'products/get');
   }
 });
 

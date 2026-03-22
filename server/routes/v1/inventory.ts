@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createUserClient } from '../../lib/supabaseClients.js';
+import { sendInternalError } from '../../lib/httpErrorResponse.js';
 
 const r = Router();
 
@@ -17,7 +18,7 @@ r.get('/:productId', async (req, res) => {
       quantity: data?.quantity ?? 0,
     });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'inventory/get');
   }
 });
 

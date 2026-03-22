@@ -63,7 +63,15 @@ export async function bffValidateCart(
     },
     body: JSON.stringify({ lines }),
   });
-  const json = (await res.json()) as Record<string, unknown>;
+  let json: Record<string, unknown> = {};
+  try {
+    json = (await res.json()) as Record<string, unknown>;
+  } catch {
+    if (!res.ok) {
+      throw new Error(`${res.status} ${res.statusText}`);
+    }
+    return { ok: false, code: 'rpc_error' };
+  }
   if (res.status === 400 && json?.ok === false) {
     const issues = Array.isArray(json.issues)
       ? (json.issues as { product_id: string; available: number; requested: number }[])

@@ -20,7 +20,7 @@ export function HomeNew() {
   const error = useProductStore((s) => s.error);
   const load = useProductStore((s) => s.load);
   const pricePulseAt = useProductStore((s) => s.pricePulseAt);
-  const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
+  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_ALL);
   const [refreshing, setRefreshing] = useState(false);
 
   const categoryOptions = useCategoryOptions();

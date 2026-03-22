@@ -14,7 +14,7 @@ import { CATEGORY_ALL } from '@/lib/catalogCategories';
 export function Catalog() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
+  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_ALL);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200000]);
   const [showFilters, setShowFilters] = useState(false);
 

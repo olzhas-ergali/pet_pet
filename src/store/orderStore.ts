@@ -7,7 +7,7 @@ type OrderState = {
   submitting: boolean;
   error: string | null;
   clearOrderError: () => void;
-  createOrderFromCart: (lines: CartLineInput[]) => Promise<string>;
+  createOrderFromCart: (lines: CartLineInput[], meta?: OrderSubmitMeta) => Promise<string>;
 };
 
 export const useOrderStore = create<OrderState>((set) => ({

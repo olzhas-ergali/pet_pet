@@ -22,7 +22,8 @@ export const useCartStore = create<CartState>()(
       items: [],
 
       addToCart: (line) => {
-        const qty = line.quantity ?? 1;
+        const raw = line.quantity ?? 1;
+        const qty = Number.isFinite(raw) ? Math.max(1, Math.floor(Number(raw))) : 1;
         set((s) => {
           const idx = s.items.findIndex((i) => i.productId === line.productId);
           if (idx === -1) {
@@ -45,9 +46,10 @@ export const useCartStore = create<CartState>()(
       },
 
       setQuantity: (productId, quantity) => {
+        const q = Number.isFinite(quantity) ? Math.max(0, Math.floor(Number(quantity))) : 0;
         set((s) => ({
           items: s.items
-            .map((i) => (i.productId === productId ? { ...i, quantity } : i))
+            .map((i) => (i.productId === productId ? { ...i, quantity: q } : i))
             .filter((i) => i.quantity > 0),
         }));
       },

@@ -36,8 +36,15 @@ async function formatOrderTelegramSummary(
   if (error || !rows?.length) {
     return `Новый заказ ${orderId.slice(0, 8)} · ${totalAmount} ₸`;
   }
-  const lines = rows.map((r: { quantity: number; price_at_time: number; products: { name: string } | null }) => {
-    const name = r.products?.name ?? '—';
+  type ItemRow = {
+    quantity: number;
+    price_at_time: number;
+    products: { name: string } | { name: string }[] | null;
+  };
+  const lines = (rows as ItemRow[]).map((r) => {
+    const rel = r.products;
+    const name =
+      Array.isArray(rel) ? (rel[0]?.name ?? '—') : (rel?.name ?? '—');
     return `· ${name} ×${r.quantity} @ ${r.price_at_time}`;
   });
   return [`Заказ ${orderId.slice(0, 8)} · ${totalAmount} ₸`, ...lines].join('\n');

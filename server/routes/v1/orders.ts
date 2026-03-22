@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { createUserClient } from '../../lib/supabaseClients.js';
+import { sendInternalError } from '../../lib/httpErrorResponse.js';
 import {
   validateCartStockRpc,
   submitOrderRpc,
@@ -17,7 +18,7 @@ r.get('/', async (req, res) => {
     if (error) throw error;
     res.json({ data: data ?? [] });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'orders/list');
   }
 });
 
@@ -46,7 +47,7 @@ r.post('/', async (req, res) => {
     await runPostOrderIntegrations(orderId, Number(ord?.total_amount ?? 0));
     res.json({ orderId });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'orders/create');
   }
 });
 
@@ -65,7 +66,7 @@ r.post('/validate-cart', async (req, res) => {
     }
     res.json({ ok: true });
   } catch (e) {
-    res.status(500).json({ error: (e as Error).message });
+    sendInternalError(res, e, 'orders/validate-cart');
   }
 });
 

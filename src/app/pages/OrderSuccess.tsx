@@ -1,12 +1,46 @@
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 import { BottomNav } from '../components/BottomNav';
+import { isSupabaseConfigured } from '@/lib/supabase/client';
+import { fetchMyOrders } from '@/lib/api/orders';
+
+type VerifyState = 'idle' | 'loading' | 'ok' | 'fail' | 'skip';
 
 export function OrderSuccess() {
   const { t } = useTranslation();
   const [params] = useSearchParams();
   const orderId = params.get('id') ?? '';
+  const [verify, setVerify] = useState<VerifyState>('idle');
+
+  useEffect(() => {
+    if (!orderId.trim()) {
+      setVerify('skip');
+      return;
+    }
+    if (!isSupabaseConfigured) {
+      setVerify('skip');
+      return;
+    }
+    let cancelled = false;
+    setVerify('loading');
+    void fetchMyOrders()
+      .then((rows) => {
+        if (cancelled) return;
+        const found = rows.some((o) => o.id === orderId);
+        setVerify(found ? 'ok' : 'fail');
+      })
+      .catch(() => {
+        if (!cancelled) setVerify('fail');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [orderId]);
+
+  const showOrderNumber = orderId && (verify === 'ok' || verify === 'skip');
+  const showVerifyWarning = verify === 'fail';
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 flex flex-col">
@@ -16,11 +50,26 @@ export function OrderSuccess() {
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('orderSuccess.title')}</h1>
         <p className="text-gray-600 mb-2">{t('orderSuccess.thanks')}</p>
-        {orderId && (
+
+        {verify === 'loading' && (
+          <p className="flex items-center justify-center gap-2 text-sm text-gray-500 mb-6">
+            <Loader2 className="w-4 h-4 animate-spin" aria-hidden />
+            {t('orderSuccess.verifying')}
+          </p>
+        )}
+
+        {showVerifyWarning && (
+          <p className="text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 max-w-md mb-6 leading-relaxed">
+            {t('orderSuccess.verifyFailed')}
+          </p>
+        )}
+
+        {showOrderNumber && (
           <p className="text-sm text-gray-500 font-mono mb-8 break-all max-w-md">
             {t('orderSuccess.number')}: {orderId}
           </p>
         )}
+
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
           <Link
             to="/catalog"

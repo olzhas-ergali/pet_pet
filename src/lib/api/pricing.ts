@@ -1,4 +1,5 @@
 import { isBffEnabled, bffFetchJson } from '@/lib/api/bff';
+import { isBffClientError } from '@/lib/api/bffClientError';
 
 export type CartQuoteLine = {
   product_id: string;
@@ -15,18 +16,31 @@ export type CartQuote = {
   currency: string;
 };
 
-export async function fetchCartQuote(
+export type FetchCartQuoteOutcome = { quote: CartQuote | null; bffUnavailable: boolean };
+
+export async function fetchCartQuoteWithMeta(
   lines: { product_id: string; quantity: number }[]
-): Promise<CartQuote | null> {
-  if (!isBffEnabled() || lines.length === 0) return null;
+): Promise<FetchCartQuoteOutcome> {
+  if (!isBffEnabled() || lines.length === 0) return { quote: null, bffUnavailable: false };
   try {
-    return await bffFetchJson<CartQuote>('/pricing/cart-quote', {
+    const quote = await bffFetchJson<CartQuote>('/pricing/cart-quote', {
       method: 'POST',
       body: JSON.stringify({ lines }),
     });
-  } catch {
-    return null;
+    return { quote, bffUnavailable: false };
+  } catch (e) {
+    const bffUnavailable =
+      isBffClientError(e) &&
+      (e.kind === 'network' || e.kind === 'unavailable' || e.kind === 'unauthorized');
+    return { quote: null, bffUnavailable: !!bffUnavailable };
   }
+}
+
+export async function fetchCartQuote(
+  lines: { product_id: string; quantity: number }[]
+): Promise<CartQuote | null> {
+  const { quote } = await fetchCartQuoteWithMeta(lines);
+  return quote;
 }
 
 export async function fetchPricingQuote(

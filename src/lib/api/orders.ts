@@ -2,6 +2,7 @@ import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import type { OrderRow } from '@/types/database';
 import type { ValidateCartResult } from '@/lib/api/orderErrors';
 import { isBffEnabled, bffFetchJson, bffValidateCart } from '@/lib/api/bff';
+import { isBffClientError } from '@/lib/api/bffClientError';
 
 export type CartLineInput = { product_id: string; quantity: number };
 
@@ -16,7 +17,11 @@ export async function validateCartStock(lines: CartLineInput[]): Promise<Validat
   if (isBffEnabled()) {
     try {
       return await bffValidateCart(lines);
-    } catch {
+    } catch (e) {
+      if (isBffClientError(e)) {
+        if (e.kind === 'unauthorized') return { ok: false, code: 'auth_required' };
+        if (e.kind === 'network' || e.kind === 'unavailable') return { ok: false, code: 'bff_unavailable' };
+      }
       return { ok: false, code: 'rpc_error' };
     }
   }

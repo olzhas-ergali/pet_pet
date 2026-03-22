@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Product } from '@/app/types';
 import { fetchProducts, mergePriceUpdate, fetchProductById } from '@/lib/api/products';
 import { isBffEnabled } from '@/lib/api/bff';
+import { mapCatalogLoadError } from '@/lib/api/orderErrors';
 
 export type PriceRowPayload = {
   product_id: string;
@@ -79,7 +80,7 @@ export const useProductStore = create<ProductState>((set) => ({
       const products = await fetchProducts();
       set({ products, loading: false });
     } catch (e) {
-      set({ error: (e as Error).message, loading: false });
+      set({ error: mapCatalogLoadError(e), loading: false });
     }
   },
 

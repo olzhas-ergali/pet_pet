@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, Loader2, AlertCircle, ShoppingBag } from 'lucide-react';
@@ -13,8 +13,9 @@ import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { validateCartStock } from '@/lib/api/orders';
 import { formatStockIssues } from '@/lib/api/orderErrors';
 import { isBffEnabled } from '@/lib/api/bff';
-import { fetchCartQuote, type CartQuote } from '@/lib/api/pricing';
+import { fetchCartQuoteWithMeta, type CartQuote } from '@/lib/api/pricing';
 import { formatNumberAmount } from '@/i18n/format';
+import { loadShippingDefaults, saveShippingDefaults } from '@/lib/shippingDefaults';
 
 type Phase = 'idle' | 'validating' | 'submitting' | 'error';
 
@@ -40,22 +41,40 @@ export function Checkout() {
   const [phase, setPhase] = useState<Phase>('idle');
   const [stockMessage, setStockMessage] = useState<string | null>(null);
   const [bffQuote, setBffQuote] = useState<CartQuote | null>(null);
+  const [bffQuoteUnavailable, setBffQuoteUnavailable] = useState(false);
+  const shippingSeeded = useRef(false);
 
   useEffect(() => {
     void loadProducts();
   }, [loadProducts]);
 
   useEffect(() => {
+    if (shippingSeeded.current) return;
+    shippingSeeded.current = true;
+    const d = loadShippingDefaults();
+    setRecipientPhone(d.recipient_phone ?? '');
+    setAddressLine(d.address_line ?? '');
+    setCity(d.city ?? '');
+  }, []);
+
+  useEffect(() => {
     if (!isBffEnabled() || items.length === 0) {
       setBffQuote(null);
+      setBffQuoteUnavailable(false);
       return;
     }
     const missing = items.some((i) => !products.find((p) => p.id === i.productId));
-    if (missing) return;
+    if (missing) {
+      setBffQuote(null);
+      setBffQuoteUnavailable(false);
+      return;
+    }
     let cancelled = false;
     const payload = items.map((i) => ({ product_id: i.productId, quantity: i.quantity }));
-    void fetchCartQuote(payload).then((q) => {
-      if (!cancelled && q) setBffQuote(q);
+    void fetchCartQuoteWithMeta(payload).then(({ quote, bffUnavailable }) => {
+      if (cancelled) return;
+      setBffQuote(quote);
+      setBffQuoteUnavailable(bffUnavailable);
     });
     return () => {
       cancelled = true;
@@ -121,6 +140,13 @@ export function Checkout() {
           setPhase('error');
           return;
         }
+        if (v.code === 'bff_unavailable') {
+          const msg = t('errors.bff.unavailable');
+          setStockMessage(msg);
+          setPhase('error');
+          toast.error(msg);
+          return;
+        }
         const msg = formatStockIssues(v.issues, nameByProductId);
         setStockMessage(msg);
         setPhase('error');
@@ -141,6 +167,11 @@ export function Checkout() {
           : undefined;
       const id = await createOrder(payload, meta);
       if (note) localStorage.setItem(`order_note_${id}`, note);
+      saveShippingDefaults({
+        recipient_phone: recipientPhone.trim(),
+        address_line: addressLine.trim(),
+        city: city.trim(),
+      });
       toast.success(t('checkout.toastSuccess'));
       navigate(`/order-success?id=${encodeURIComponent(id)}`, { replace: true });
       setPhase('idle');
@@ -218,6 +249,12 @@ export function Checkout() {
             >
               {t('catalog.loadErrorRetry')}
             </button>
+          </div>
+        )}
+
+        {isBffEnabled() && bffQuoteUnavailable && items.length > 0 && !checkoutHardBlock && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+            {t('checkout.bffQuoteBanner')}
           </div>
         )}
 

@@ -1,7 +1,31 @@
 import i18n from '@/i18n';
+import { isBffClientError } from '@/lib/api/bffClientError';
+
+/** Сообщение при ошибке загрузки каталога (BFF / сеть). */
+export function mapCatalogLoadError(err: unknown): string {
+  if (isBffClientError(err)) {
+    if (err.kind === 'unauthorized') return i18n.t('errors.submit.auth');
+    if (err.kind === 'network' || err.kind === 'unavailable') return i18n.t('errors.bff.unavailable');
+    if (err.kind === 'http') {
+      const m = extractMessage(err);
+      return m.length < 180 ? m : i18n.t('errors.rpc.generic');
+    }
+  }
+  const m = extractMessage(err);
+  return m.length < 220 ? m : i18n.t('errors.rpc.generic');
+}
 
 /** Человекочитаемые сообщения по ошибкам RPC / PostgREST */
 export function mapSubmitOrderError(err: unknown): string {
+  if (isBffClientError(err)) {
+    if (err.kind === 'network' || err.kind === 'unavailable') return i18n.t('errors.bff.unavailable');
+    if (err.kind === 'unauthorized') return i18n.t('errors.submit.auth');
+    if (err.kind === 'http') {
+      const raw = extractMessage(err);
+      if (raw.length < 200) return raw;
+      return i18n.t('errors.submit.generic');
+    }
+  }
   const raw = extractMessage(err);
   if (/insufficient stock|insufficient_stock/i.test(raw)) {
     return i18n.t('errors.submit.insufficient');
@@ -27,6 +51,13 @@ export function mapSubmitOrderError(err: unknown): string {
 
 /** Сообщения для toast/alert по типичным ошибкам PostgREST / сети */
 export function mapRpcUserMessage(err: unknown): string {
+  if (isBffClientError(err)) {
+    if (err.kind === 'unauthorized') return i18n.t('errors.rpc.auth');
+    if (err.kind === 'network' || err.kind === 'unavailable') return i18n.t('errors.bff.unavailable');
+    const msg = extractMessage(err);
+    if (msg.length < 220) return msg;
+    return i18n.t('errors.rpc.generic');
+  }
   const msg = extractMessage(err);
   const raw = msg.toLowerCase();
   if (!raw.trim()) return i18n.t('errors.rpc.generic');

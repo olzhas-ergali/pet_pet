@@ -22,6 +22,7 @@ export function useOrdersRealtime() {
         { event: '*', schema: 'public', table: 'orders' },
         () => {
           useOrderFeedStore.getState().bump();
+          if (user?.role === 'admin') return;
           if (toastDebounce.current) clearTimeout(toastDebounce.current);
           toastDebounce.current = setTimeout(() => {
             toast.info(i18n.t('realtime.ordersSynced'));
@@ -39,5 +40,5 @@ export function useOrdersRealtime() {
       if (toastDebounce.current) clearTimeout(toastDebounce.current);
       void supabase.removeChannel(ch);
     };
-  }, [user?.id]);
+  }, [user?.id, user?.role]);
 }

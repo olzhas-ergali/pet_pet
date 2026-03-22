@@ -10,7 +10,7 @@ import { useCartStore } from '@/store/cartStore';
 import { useProductStore } from '@/store/productStore';
 import { resolveUnitPrice } from '@/lib/pricing';
 import { isBffEnabled } from '@/lib/api/bff';
-import { fetchCartQuote, type CartQuote } from '@/lib/api/pricing';
+import { fetchCartQuoteWithMeta, type CartQuote } from '@/lib/api/pricing';
 import { formatNumberAmount } from '@/i18n/format';
 
 export function Cart() {
@@ -27,6 +27,7 @@ export function Cart() {
   const pricePulseAt = useProductStore((s) => s.pricePulseAt);
 
   const [bffQuote, setBffQuote] = useState<CartQuote | null>(null);
+  const [bffQuoteUnavailable, setBffQuoteUnavailable] = useState(false);
 
   useEffect(() => {
     void loadProducts();
@@ -35,14 +36,21 @@ export function Cart() {
   useEffect(() => {
     if (!isBffEnabled() || items.length === 0) {
       setBffQuote(null);
+      setBffQuoteUnavailable(false);
       return;
     }
     const missing = items.some((i) => !products.find((p) => p.id === i.productId));
-    if (missing) return;
+    if (missing) {
+      setBffQuote(null);
+      setBffQuoteUnavailable(false);
+      return;
+    }
     let cancelled = false;
     const payload = items.map((i) => ({ product_id: i.productId, quantity: i.quantity }));
-    void fetchCartQuote(payload).then((q) => {
-      if (!cancelled && q) setBffQuote(q);
+    void fetchCartQuoteWithMeta(payload).then(({ quote, bffUnavailable }) => {
+      if (cancelled) return;
+      setBffQuote(quote);
+      setBffQuoteUnavailable(bffUnavailable);
     });
     return () => {
       cancelled = true;
@@ -162,6 +170,12 @@ export function Cart() {
               <RefreshCw className="w-4 h-4" />
               {t('common.retry')}
             </button>
+          </div>
+        )}
+
+        {isBffEnabled() && bffQuoteUnavailable && !hasMissingProduct && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            {t('checkout.bffQuoteBanner')}
           </div>
         )}
 

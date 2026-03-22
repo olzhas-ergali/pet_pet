@@ -1,6 +1,13 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import i18n from '@/i18n';
-import { mapSubmitOrderError, formatStockIssues, extractMessage, mapRpcUserMessage } from './orderErrors';
+import { BffClientError } from '@/lib/api/bffClientError';
+import {
+  mapSubmitOrderError,
+  mapCatalogLoadError,
+  formatStockIssues,
+  extractMessage,
+  mapRpcUserMessage,
+} from './orderErrors';
 
 beforeAll(async () => {
   await i18n.changeLanguage('ru');
@@ -14,6 +21,14 @@ describe('mapSubmitOrderError', () => {
 
   it('мапит auth', () => {
     expect(mapSubmitOrderError({ message: 'auth required' })).toContain('Сессия');
+  });
+
+  it('мапит BffClientError unauthorized', () => {
+    expect(mapSubmitOrderError(new BffClientError('unauthorized'))).toContain('Сессия');
+  });
+
+  it('мапит BffClientError network', () => {
+    expect(mapCatalogLoadError(new BffClientError('network'))).toContain('BFF');
   });
 
   it('extractMessage из строки', () => {

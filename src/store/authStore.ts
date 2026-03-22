@@ -59,6 +59,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({ user: null });
           return;
         }
+        if (event === 'SIGNED_IN' && session?.user) {
+          const prev = get().user?.id;
+          if (prev && prev !== session.user.id) {
+            useCartStore.getState().clearCart();
+          }
+        }
         let u = baseUserFromSession(session);
         if (u) u = await mergeProfile(u);
         set({ user: u });

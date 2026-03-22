@@ -130,11 +130,14 @@
     "shippingPhone": "Recipient phone",
     "shippingAddress": "Address (street, building)",
     "shippingCity": "City",
-    "emptyHint": "Add items to your cart or open the catalog to pick products."
+    "emptyHint": "Add items to your cart or open the catalog to pick products.",
+    "bffQuoteBanner": "Pricing server is unavailable — totals are estimated locally and may differ from the final order."
   },
   "orderSuccess": {
     "title": "Order placed",
     "thanks": "Thank you for your purchase.",
+    "verifying": "Verifying your order…",
+    "verifyFailed": "We couldn’t find this ID in your orders. Open Profile — if the order is listed, you’re all set.",
     "number": "No.",
     "toCatalog": "Catalog",
     "orders": "Orders"
@@ -171,7 +174,10 @@
     "fieldEmail": "Email",
     "fieldDisplayName": "Display name",
     "addressesPageTitle": "Delivery addresses",
-    "addressesPageHint": "Saved addresses will appear here once logistics is connected.",
+    "addressesPageHint": "Default shipping details for checkout.",
+    "addressesFormHint": "Stored only in this browser on this device and prefilled at checkout. Server sync can be added later.",
+    "addressesSave": "Save",
+    "addressesSaved": "Saved on this device.",
     "addressesEmpty": "No saved addresses yet.",
     "paymentPageTitle": "Payment methods",
     "paymentPageHint": "Cards and bank links — in a future release.",
@@ -373,6 +379,10 @@
     "orderStatusUpdated": "Order status updated"
   },
   "errors": {
+    "bff": {
+      "unavailable": "API server is unavailable. Start the BFF (npm run dev:bff) or try again later.",
+      "quoteFallback": "Totals are calculated locally; the pricing server did not respond."
+    },
     "rpc": {
       "generic": "Request failed. Try again later.",
       "permission": "You don’t have permission for this action.",

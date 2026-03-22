@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createUserClient } from '../../lib/supabaseClients.js';
 import { sendInternalError } from '../../lib/httpErrorResponse.js';
+import { parseOrderLines } from '../../lib/orderLines.js';
 import {
   validateCartStockRpc,
   submitOrderRpc,
@@ -24,9 +25,9 @@ r.get('/', async (req, res) => {
 
 r.post('/', async (req, res) => {
   try {
-    const lines = req.body?.lines as { product_id: string; quantity: number }[];
-    if (!Array.isArray(lines) || lines.length === 0) {
-      res.status(400).json({ error: 'lines required' });
+    const lines = parseOrderLines(req.body?.lines);
+    if (!lines) {
+      res.status(400).json({ error: 'invalid_lines' });
       return;
     }
     const meta = (req.body?.meta as Record<string, unknown> | undefined) ?? {};
@@ -44,7 +45,12 @@ r.post('/', async (req, res) => {
       .eq('id', orderId)
       .single();
     if (oe) throw oe;
-    await runPostOrderIntegrations(orderId, Number(ord?.total_amount ?? 0));
+    const total = Number(ord?.total_amount ?? 0);
+    try {
+      await runPostOrderIntegrations(orderId, total);
+    } catch (postErr) {
+      console.error('[orders/create] post-integration', postErr);
+    }
     res.json({ orderId });
   } catch (e) {
     sendInternalError(res, e, 'orders/create');
@@ -53,9 +59,13 @@ r.post('/', async (req, res) => {
 
 r.post('/validate-cart', async (req, res) => {
   try {
-    const lines = req.body?.lines as { product_id: string; quantity: number }[];
-    if (!Array.isArray(lines)) {
-      res.status(400).json({ error: 'lines required' });
+    const lines = parseOrderLines(req.body?.lines, { allowEmpty: true });
+    if (lines === null) {
+      res.status(400).json({ error: 'invalid_lines' });
+      return;
+    }
+    if (lines.length === 0) {
+      res.json({ ok: true });
       return;
     }
     const supabase = createUserClient(req.accessToken!);

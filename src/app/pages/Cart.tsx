@@ -273,8 +273,9 @@ export function Cart() {
                               }
                               disabled={lineMissing}
                               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white transition-colors disabled:opacity-40"
+                              aria-label={t('cart.ariaDecreaseQty')}
                             >
-                              <Minus className="w-4 h-4" />
+                              <Minus className="w-4 h-4" aria-hidden />
                             </button>
                             <span className="font-semibold min-w-[2rem] text-center">
                               {item.quantity}
@@ -290,8 +291,9 @@ export function Cart() {
                               }}
                               disabled={lineMissing || (p != null && item.quantity >= p.stock)}
                               className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white transition-colors disabled:opacity-40"
+                              aria-label={t('cart.ariaIncreaseQty')}
                             >
-                              <Plus className="w-4 h-4" />
+                              <Plus className="w-4 h-4" aria-hidden />
                             </button>
                           </div>
 
@@ -303,8 +305,9 @@ export function Cart() {
                             type="button"
                             onClick={() => removeItem(item.productId)}
                             className="ml-auto text-red-500 hover:text-red-700 p-2"
+                            aria-label={t('cart.ariaRemoveItem', { name: item.name })}
                           >
-                            <Trash2 className="w-5 h-5" />
+                            <Trash2 className="w-5 h-5" aria-hidden />
                           </button>
                         </div>
                       </div>

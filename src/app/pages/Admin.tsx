@@ -8,6 +8,7 @@ import {
   Megaphone,
   Percent,
   Bell,
+  ClipboardList,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
@@ -18,6 +19,8 @@ import { useAuthStore } from '@/store/authStore';
 import { fetchProducts } from '@/lib/api/products';
 import {
   fetchAdminSalesOverview,
+  fetchAdminOrders,
+  adminSetOrderStatus,
   adminEnqueueNotification,
   adminBulkApplyDiscountPercent,
   type AdminSalesOverview,
@@ -28,8 +31,9 @@ import type { Product } from '../types';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { CATEGORY_ID_TO_DB } from '@/lib/catalogCategories';
 import { formatNumberAmount } from '@/i18n/format';
+import type { OrderRow } from '@/types/database';
 
-type AdminTab = 'overview' | 'catalog' | 'suppliers' | 'broadcast' | 'promotions' | 'alerts';
+type AdminTab = 'overview' | 'orders' | 'catalog' | 'suppliers' | 'broadcast' | 'promotions' | 'alerts';
 
 export function Admin() {
   const { t, i18n } = useTranslation();
@@ -40,6 +44,8 @@ export function Admin() {
   const [stats, setStats] = useState<AdminSalesOverview | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState(false);
+  const [adminOrders, setAdminOrders] = useState<OrderRow[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const isAdmin = user?.role === 'admin';
 
   const reloadProducts = useCallback(async () => {
@@ -55,6 +61,20 @@ export function Admin() {
     }
   }, [isAdmin]);
 
+  const reloadOrders = useCallback(async () => {
+    if (!isSupabaseConfigured || !isAdmin) return;
+    setOrdersLoading(true);
+    try {
+      const o = await fetchAdminOrders();
+      setAdminOrders(o);
+    } catch (e) {
+      toast.error(mapRpcUserMessage(e));
+      setAdminOrders([]);
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [isAdmin]);
+
   useEffect(() => {
     if (!isAdmin) {
       setLoading(false);
@@ -62,6 +82,11 @@ export function Admin() {
     }
     void reloadProducts();
   }, [isAdmin, reloadProducts]);
+
+  useEffect(() => {
+    if (!isAdmin || tab !== 'orders' || !isSupabaseConfigured) return;
+    void reloadOrders();
+  }, [isAdmin, tab, reloadOrders]);
 
   useEffect(() => {
     if (!isAdmin || tab !== 'overview' || !isSupabaseConfigured) return;
@@ -83,6 +108,7 @@ export function Admin() {
 
   const tabs: { id: AdminTab; icon: typeof LayoutDashboard; labelKey: string }[] = [
     { id: 'overview', icon: LayoutDashboard, labelKey: 'admin.tabOverview' },
+    { id: 'orders', icon: ClipboardList, labelKey: 'admin.tabOrders' },
     { id: 'catalog', icon: Package, labelKey: 'admin.tabCatalog' },
     { id: 'suppliers', icon: Users, labelKey: 'admin.tabSuppliers' },
     { id: 'broadcast', icon: Megaphone, labelKey: 'admin.tabBroadcast' },
@@ -188,6 +214,73 @@ export function Admin() {
                   >
                     {t('admin.refresh')}
                   </button>
+                </div>
+              )}
+
+              {tab === 'orders' && (
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-gray-600">{t('admin.ordersPanelHint')}</p>
+                    <button
+                      type="button"
+                      onClick={() => void reloadOrders()}
+                      className="text-sm font-semibold text-emerald-600 hover:underline"
+                    >
+                      {t('admin.refresh')}
+                    </button>
+                  </div>
+                  {ordersLoading ? (
+                    <div className="space-y-3">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-24 w-full rounded-2xl" />
+                      ))}
+                    </div>
+                  ) : adminOrders.length === 0 ? (
+                    <p className="text-sm text-gray-500">{t('admin.ordersEmpty')}</p>
+                  ) : (
+                    <ul className="space-y-3">
+                      {adminOrders.map((o) => (
+                        <li
+                          key={o.id}
+                          className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm flex flex-col sm:flex-row sm:items-center gap-3 justify-between"
+                        >
+                          <div className="text-sm space-y-1">
+                            <p className="font-mono text-xs text-gray-500">{o.id.slice(0, 8)}…</p>
+                            <p className="font-semibold">
+                              {fmtMoney(Number(o.total_amount))}
+                              {o.tracking_number ? (
+                                <span className="ml-2 text-xs font-normal text-gray-500">
+                                  · {t('profile.tracking')}: {o.tracking_number}
+                                </span>
+                              ) : null}
+                            </p>
+                          </div>
+                          <select
+                            className="border-2 border-gray-200 rounded-xl px-3 py-2 text-sm bg-white min-w-[140px]"
+                            value={o.status}
+                            onChange={(e) => {
+                              const next = e.target.value;
+                              void (async () => {
+                                try {
+                                  await adminSetOrderStatus(o.id, next);
+                                  toast.success(t('admin.orderStatusUpdated'));
+                                  await reloadOrders();
+                                } catch (err) {
+                                  toast.error(mapRpcUserMessage(err));
+                                }
+                              })();
+                            }}
+                          >
+                            {['pending', 'paid', 'shipped', 'cancelled', 'completed'].map((s) => (
+                              <option key={s} value={s}>
+                                {t(`orders.status.${s}`)}
+                              </option>
+                            ))}
+                          </select>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
 

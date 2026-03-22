@@ -37,6 +37,8 @@
     "changePhone": "Изменить номер",
     "login": "Войти",
     "terms": "Нажимая «Получить код», вы соглашаетесь с условиями использования сервиса.",
+    "backToLanding": "← На главную (лендинг)",
+    "passwordPlaceholder": "Пароль",
     "toastNoEnv": "Нет VITE_SUPABASE_URL / ANON_KEY",
     "toastCodeSent": "Код отправлен",
     "toastWelcome": "Добро пожаловать!",
@@ -60,7 +62,10 @@
     "emptyDbHint": "Проверьте подключение к Supabase и seed-данные, затем обновите страницу.",
     "emptyFilter": "Ничего не найдено",
     "emptyFilterHint": "Попробуйте изменить параметры поиска",
-    "resetFilters": "Сбросить фильтры"
+    "resetFilters": "Сбросить фильтры",
+    "loadError": "Не удалось загрузить каталог",
+    "loadErrorRetry": "Повторить загрузку",
+    "clearSearch": "Очистить поиск"
   },
   "cart": {
     "title": "Корзина",
@@ -89,7 +94,10 @@
     "productMissing": "Товар удалён из каталога или недоступен",
     "checkoutBlocked": "Исправьте корзину: недоступные позиции или остатки",
     "removeInvalid": "Удалить недоступные позиции",
-    "invalidCleared": "Удалено позиций: {{count}}"
+    "invalidCleared": "Удалено позиций: {{count}}",
+    "ariaDecreaseQty": "Уменьшить количество",
+    "ariaIncreaseQty": "Увеличить количество",
+    "ariaRemoveItem": "Удалить {{name}} из корзины"
   },
   "checkout": {
     "title": "Оформление",
@@ -116,7 +124,13 @@
     "toastLoadCatalogDesc": "Нажмите «Обновить» ниже",
     "toastSuccess": "Заказ создан",
     "toastStock": "Недостаточно товара",
-    "toastFail": "Оформление не удалось"
+    "toastFail": "Оформление не удалось",
+    "shippingTitle": "Получатель и доставка",
+    "shippingHint": "Для логистики и уведомлений — можно заполнить позже в продакшене, но рекомендуем сейчас.",
+    "shippingPhone": "Телефон получателя",
+    "shippingAddress": "Адрес (улица, дом)",
+    "shippingCity": "Город",
+    "emptyHint": "Добавьте товары в корзину или откройте каталог, чтобы выбрать позиции."
   },
   "orderSuccess": {
     "title": "Заказ оформлен",
@@ -145,7 +159,27 @@
     "personal": "Личные данные",
     "addresses": "Адреса доставки",
     "payment": "Способы оплаты",
-    "notifications": "Уведомления"
+    "notifications": "Уведомления",
+    "tracking": "Трек",
+    "ordersError": "Не удалось загрузить заказы. Проверьте сеть и попробуйте снова.",
+    "ordersRetry": "Обновить список",
+    "noOrdersYet": "Заказов пока нет — загляните в каталог.",
+    "backToProfile": "Назад в профиль",
+    "personalPageTitle": "Личные данные",
+    "personalPageHint": "Данные из вашего аккаунта Supabase.",
+    "fieldPhone": "Телефон",
+    "fieldEmail": "Email",
+    "fieldDisplayName": "Имя",
+    "addressesPageTitle": "Адреса доставки",
+    "addressesPageHint": "Сохранённые адреса появятся здесь после подключения профиля к логистике.",
+    "addressesEmpty": "Пока нет сохранённых адресов.",
+    "paymentPageTitle": "Способы оплаты",
+    "paymentPageHint": "Привязка карт и счетов — в следующих версиях.",
+    "paymentEmpty": "Способы оплаты не добавлены.",
+    "notificationsPageTitle": "Уведомления",
+    "notificationsPageHint": "Каналы уведомлений (демо):",
+    "notificationsItemPrices": "Изменения цен в реальном времени",
+    "notificationsItemOrders": "Статусы заказов"
   },
   "home": {
     "tagline": "Живые оптовые цены",
@@ -162,7 +196,8 @@
     "sectionLow": "Быстро раскупают",
     "sectionLowSub": "Осталось совсем мало",
     "notFound": "Товары не найдены",
-    "notFoundHint": "Проверьте .env или выберите другую категорию"
+    "notFoundHint": "Проверьте .env или выберите другую категорию",
+    "bellAria": "Уведомления (скоро)"
   },
   "fomo": {
     "title": "Кто-то только что купил",
@@ -172,7 +207,53 @@
   "realtime": {
     "pricesBatch": "Цены обновлены ({{count}} поз.)",
     "disconnected": "Поток цен временно недоступен. Каталог мог устареть.",
-    "retrySync": "Обновить каталог"
+    "retrySync": "Обновить каталог",
+    "ordersSynced": "Заказы обновлены в реальном времени"
+  },
+  "orders": {
+    "status": {
+      "pending": "Ожидает оплаты",
+      "paid": "Оплачен",
+      "shipped": "В пути",
+      "cancelled": "Отменён",
+      "completed": "Завершён"
+    }
+  },
+  "landing": {
+    "brand": "OptBirja",
+    "brandSub": "Живая оптовая биржа",
+    "signIn": "Войти",
+    "toCatalog": "В каталог",
+    "liveBadge": "Цены и остатки в реальном времени",
+    "heroTitle": "Живая оптовая биржа товаров — партнёрство возможно",
+    "heroSubtitle": "Один клик от выбора до заказа: фиксация цены на сервере, контроль остатков, статусы доставки и уведомления для всех ролей.",
+    "ctaPrimary": "Смотреть каталог",
+    "ctaSecondary": "Стать партнёром",
+    "benefit1Title": "Цены живые",
+    "benefit1Body": "Подписка на изменения в Postgres — вы видите актуальные котировки и FOMO-сигналы без перезагрузки.",
+    "benefit2Title": "Остатки под контролем",
+    "benefit2Body": "RPC submit_order атомарно проверяет склад и фиксирует цену строки — меньше споров и отмен.",
+    "benefit3Title": "Цепочка ролей",
+    "benefit3Body": "Клиент → поставщик → логистика: события в очереди, Telegram-заглушка и готовность к мобильному приложению.",
+    "fomoTitle": "Динамика спроса",
+    "fomoBody": "Покупатели видят «осталось мало» и недавние сделки; поставщики — заказы с их товарами в том же потоке данных.",
+    "fomoBullet1": "Авто-пайплайн статусов при включённом BFF и service role (демо).",
+    "fomoBullet2": "Категории и оптовые уровни — прозрачно в карточке товара.",
+    "categoriesTitle": "Категории",
+    "categoriesHint": "После входа откройте каталог — фильтры и поиск уже в приложении.",
+    "partnerTitle": "Стать партнёром",
+    "partnerSubtitle": "Оставьте контакт — команда свяжется с вами (демо: заявка только в интерфейсе).",
+    "formEmail": "Email",
+    "formNote": "Компания, объём, регион",
+    "formSubmit": "Отправить заявку",
+    "formThanks": "Заявка принята",
+    "formNeedEmail": "Укажите email",
+    "formDisclaimer": "Нажимая кнопку, вы соглашаетесь на обработку контактных данных для связи по партнёрству.",
+    "footerCopy": "© OptBirja · оптовая биржа",
+    "footerTelegram": "Telegram",
+    "footerLinkedIn": "LinkedIn",
+    "footerEmail": "hello@optbirja.local",
+    "footerMarket": "Демо-витрина (рынок)"
   },
   "productDetail": {
     "priceHint": "Цена за шт с учётом выбранного количества (опт)",
@@ -186,11 +267,26 @@
     "grandSavings": "Экономия: {{amount}} {{currency}}",
     "addToCart": "В корзину",
     "buyNow": "Купить сейчас",
+    "buyOneClick": "Заказ в 1 клик",
+    "buyOneClickHint": "В корзину и сразу на оформление",
     "supplier": "Поставщик",
     "delivery": "Доставка",
     "deliveryEta": "1–2 дня · бесплатно от {{amount}} {{currency}}",
     "priceHistory": "История изменения цены",
-    "tierRange": "{{min}}–{{max}} {{units}}"
+    "tierRange": "{{min}}–{{max}} {{units}}",
+    "loading": "Загрузка…",
+    "notFound": "Товар не найден",
+    "toCatalog": "В каталог",
+    "backNav": "Назад",
+    "carouselPrev": "Предыдущее изображение",
+    "carouselNext": "Следующее изображение",
+    "chooseImage": "Показать изображение {{n}}",
+    "thumbnailAlt": "Миниатюра {{n}}",
+    "toastAdded": "Добавлено в корзину",
+    "toastAddedDesc": "{{name}} × {{count}} {{units}}",
+    "toastGoCart": "В корзину",
+    "ariaQtyMinus": "Уменьшить количество",
+    "ariaQtyPlus": "Увеличить количество"
   },
   "productCard": {
     "top": "ТОП",
@@ -226,7 +322,10 @@
     "empty": "Пока нет товаров",
     "discountPh": "скидка",
     "save": "Сохранить цену и остаток",
-    "saved": "Сохранено"
+    "saved": "Сохранено",
+    "incomingOrders": "Заказы с вашими товарами",
+    "noOrdersYet": "Пока нет заказов по вашим позициям",
+    "ordersRealtimeHint": "Список обновляется через Supabase Realtime при смене статусов."
   },
   "admin": {
     "title": "Админ",
@@ -239,6 +338,7 @@
     "apply": "Применить",
     "updated": "Обновлено",
     "tabOverview": "Обзор",
+    "tabOrders": "Заказы",
     "tabCatalog": "Каталог",
     "tabSuppliers": "Поставщики",
     "tabBroadcast": "Рассылки",
@@ -267,7 +367,10 @@
     "alertsLowStock": "Низкий остаток (<20)",
     "alertsHot": "Горячие скидки (>20%)",
     "noAlerts": "Сейчас нет тревог по порогам",
-    "refresh": "Обновить данные"
+    "refresh": "Обновить данные",
+    "ordersPanelHint": "Статусы и трекинг; при BFF+service role демо-пайплайн прогоняет paid → shipped → completed.",
+    "ordersEmpty": "Заказов пока нет",
+    "orderStatusUpdated": "Статус заказа обновлён"
   },
   "errors": {
     "rpc": {

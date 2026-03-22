@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptBirja — отчёт (печать / PDF)</title>
+    <style>
+      :root {
+        --ink: #1a1a1a;
+        --muted: #555;
+        --line: #ddd;
+        --accent: #047857;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        color: var(--ink);
+        line-height: 1.55;
+        max-width: 48rem;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.5rem;
+        margin-top: 0;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin-top: 1.75rem;
+        color: var(--accent);
+      }
+      p,
+      li {
+        font-size: 0.95rem;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+        margin: 0.75rem 0;
+      }
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 0.45rem 0.6rem;
+        text-align: left;
+      }
+      th {
+        background: #f6f6f6;
+      }
+      .toolbar {
+        position: sticky;
+        top: 0;
+        background: #fff;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 1.25rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .toolbar button {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .toolbar button:hover {
+        opacity: 0.92;
+      }
+      @media print {
+        .toolbar {
+          display: none;
+        }
+        body {
+          padding: 0;
+        }
+        a {
+          color: inherit;
+          text-decoration: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="toolbar">
+      <button type="button" onclick="window.print()">Печать / Сохранить как PDF</button>
+      <span class="muted">В диалоге печати выберите «Сохранить как PDF» (Chrome / Edge / Safari).</span>
+    </div>
+
+    <h1>Отчёт: бизнес-процесс, архитектура и запуск (OptBirja)</h1>
+    <p class="muted">Статическая копия для печати. Актуальная версия: <code>docs/BUSINESS-FLOW-REPORT.md</code> в репозитории.</p>
+
+    <h2>1. Запуск локально</h2>
+    <ol>
+      <li><code>npm install</code></li>
+      <li>Скопировать <code>.env.example</code> → <code>.env</code>, указать <code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_ANON_KEY</code>.</li>
+      <li>В Supabase выполнить миграции из <code>supabase/migrations/</code> по порядку.</li>
+      <li>Опционально: BFF, <code>SUPABASE_SERVICE_ROLE_KEY</code> для демо-пайплайна статусов.</li>
+      <li><code>npm run dev</code> — фронт.</li>
+      <li>Docker: см. <code>README.md</code>, <code>docs/LOCAL-POSTGRES.md</code>.</li>
+    </ol>
+
+    <h2>2. Архитектура (кратко)</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Слой</th>
+          <th>Назначение</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Vite + React</td>
+          <td>SPA: лендинг, витрина, каталог, checkout, профиль, поставщик, админ.</td>
+        </tr>
+        <tr>
+          <td>Zustand</td>
+          <td>Корзина, каталог, заказ, auth.</td>
+        </tr>
+        <tr>
+          <td>Supabase</td>
+          <td>Auth, Postgres, RLS, RPC, Realtime.</td>
+        </tr>
+        <tr>
+          <td>BFF (Express)</td>
+          <td>При <code>VITE_USE_BFF=true</code>: валидация корзины, интеграции.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Бизнес-процесс (целевой поток)</h2>
+    <p>
+      Клиент выбирает товар → оформление (<code>submit_order</code>) → события интеграций → при наличии BFF + service role демо-статусы
+      paid → shipped → completed; поставщик видит заказы с его товарами; клиент видит трек в профиле.
+    </p>
+
+    <h2>4. Edge-кейсы</h2>
+    <p>Пустая корзина, недостаток остатков, отсутствие цены, нет Supabase, отключение Realtime — см. подробности в Markdown-отчёте.</p>
+
+    <h2>5. Ограничения</h2>
+    <p>Отмена заказа без возврата остатков; демо-пайплайн синхронный; форма партнёра на лендинге без бэкенда; один Telegram chat в BFF.</p>
+
+    <h2>6. Маршруты UI</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Путь</th>
+          <th>Доступ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>/</td>
+          <td>Лендинг</td>
+        </tr>
+        <tr>
+          <td>/auth</td>
+          <td>Вход</td>
+        </tr>
+        <tr>
+          <td>/market, /catalog, …</td>
+          <td>После авторизации</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="muted" style="margin-top: 2rem">Конец отчёта.</p>
+  </body>
+</html>

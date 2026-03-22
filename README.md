@@ -62,13 +62,18 @@ docker compose up -d web
 
 Откройте http://localhost:8080
 
-Опционально Postgres локально: `docker compose --profile db up -d db` (порт 5433). Схему всё равно проще применять в Supabase.
+Опционально чистый Postgres: `docker compose up -d db` (порт **5433**). Полная схема как в облаке — через **Supabase CLI**: `npm run db:start`, затем `npm run db:reset` (нужен Docker). Подробнее: **[docs/LOCAL-POSTGRES.md](docs/LOCAL-POSTGRES.md)**.
 
 ## Тесты
 
 ```bash
-npm test
+npm run test:smoke   # быстрый смоук UI
+npm test             # все unit/integration Vitest
 ```
+
+## Бесплатное развёртывание (тест / демо)
+
+- **[docs/DEPLOY-FREE.md](docs/DEPLOY-FREE.md)** — Supabase Free + Vercel/Netlify/Cloudflare Pages; опционально BFF на Render и т.д.
 
 ## Полный аудит и QA
 

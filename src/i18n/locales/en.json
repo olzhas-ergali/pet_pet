@@ -37,6 +37,8 @@
     "changePhone": "Change number",
     "login": "Sign in",
     "terms": "By tapping “Get code”, you agree to the terms of service.",
+    "backToLanding": "← Back to landing",
+    "passwordPlaceholder": "Password",
     "toastNoEnv": "Missing VITE_SUPABASE_URL / ANON_KEY",
     "toastCodeSent": "Code sent",
     "toastWelcome": "Welcome!",
@@ -60,7 +62,10 @@
     "emptyDbHint": "Check your Supabase connection and seed data, then refresh.",
     "emptyFilter": "Nothing found",
     "emptyFilterHint": "Try changing search or filters",
-    "resetFilters": "Reset filters"
+    "resetFilters": "Reset filters",
+    "loadError": "Could not load catalog",
+    "loadErrorRetry": "Try again",
+    "clearSearch": "Clear search"
   },
   "cart": {
     "title": "Cart",
@@ -89,7 +94,10 @@
     "productMissing": "This product is no longer in the catalog",
     "checkoutBlocked": "Fix your cart: unavailable items or stock limits",
     "removeInvalid": "Remove unavailable items",
-    "invalidCleared": "Removed items: {{count}}"
+    "invalidCleared": "Removed items: {{count}}",
+    "ariaDecreaseQty": "Decrease quantity",
+    "ariaIncreaseQty": "Increase quantity",
+    "ariaRemoveItem": "Remove {{name}} from cart"
   },
   "checkout": {
     "title": "Checkout",
@@ -116,7 +124,13 @@
     "toastLoadCatalogDesc": "Tap “Refresh” below",
     "toastSuccess": "Order placed",
     "toastStock": "Not enough stock",
-    "toastFail": "Checkout failed"
+    "toastFail": "Checkout failed",
+    "shippingTitle": "Recipient & delivery",
+    "shippingHint": "For logistics and alerts — optional in MVP but recommended.",
+    "shippingPhone": "Recipient phone",
+    "shippingAddress": "Address (street, building)",
+    "shippingCity": "City",
+    "emptyHint": "Add items to your cart or open the catalog to pick products."
   },
   "orderSuccess": {
     "title": "Order placed",
@@ -145,7 +159,27 @@
     "personal": "Personal data",
     "addresses": "Delivery addresses",
     "payment": "Payment methods",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "tracking": "Tracking",
+    "ordersError": "Could not load orders. Check your connection and try again.",
+    "ordersRetry": "Refresh list",
+    "noOrdersYet": "No orders yet — browse the catalog.",
+    "backToProfile": "Back to profile",
+    "personalPageTitle": "Personal data",
+    "personalPageHint": "Data from your Supabase account.",
+    "fieldPhone": "Phone",
+    "fieldEmail": "Email",
+    "fieldDisplayName": "Display name",
+    "addressesPageTitle": "Delivery addresses",
+    "addressesPageHint": "Saved addresses will appear here once logistics is connected.",
+    "addressesEmpty": "No saved addresses yet.",
+    "paymentPageTitle": "Payment methods",
+    "paymentPageHint": "Cards and bank links — in a future release.",
+    "paymentEmpty": "No payment methods added.",
+    "notificationsPageTitle": "Notifications",
+    "notificationsPageHint": "Channels (demo):",
+    "notificationsItemPrices": "Live price changes",
+    "notificationsItemOrders": "Order status updates"
   },
   "home": {
     "tagline": "Live wholesale prices",
@@ -162,7 +196,8 @@
     "sectionLow": "Selling fast",
     "sectionLowSub": "Very low stock",
     "notFound": "No products found",
-    "notFoundHint": "Check .env or pick another category"
+    "notFoundHint": "Check .env or pick another category",
+    "bellAria": "Notifications (coming soon)"
   },
   "fomo": {
     "title": "Someone just bought",
@@ -172,7 +207,53 @@
   "realtime": {
     "pricesBatch": "Prices updated ({{count}} items)",
     "disconnected": "Live price stream is down. Catalog may be stale.",
-    "retrySync": "Refresh catalog"
+    "retrySync": "Refresh catalog",
+    "ordersSynced": "Orders updated in real time"
+  },
+  "orders": {
+    "status": {
+      "pending": "Pending payment",
+      "paid": "Paid",
+      "shipped": "In transit",
+      "cancelled": "Cancelled",
+      "completed": "Completed"
+    }
+  },
+  "landing": {
+    "brand": "OptBirja",
+    "brandSub": "Live wholesale exchange",
+    "signIn": "Sign in",
+    "toCatalog": "Catalog",
+    "liveBadge": "Live prices & stock",
+    "heroTitle": "Live wholesale marketplace — partnership is possible",
+    "heroSubtitle": "From pick to order in one flow: server-side price lock, stock checks, delivery statuses and role-based notifications.",
+    "ctaPrimary": "Browse catalog",
+    "ctaSecondary": "Become a partner",
+    "benefit1Title": "Live prices",
+    "benefit1Body": "Postgres realtime — see fresh quotes and FOMO cues without reload.",
+    "benefit2Title": "Stock under control",
+    "benefit2Body": "submit_order RPC locks rows and fixes line prices — fewer disputes.",
+    "benefit3Title": "Role chain",
+    "benefit3Body": "Customer → supplier → logistics: event queue, Telegram stub, ready for mobile.",
+    "fomoTitle": "Demand dynamics",
+    "fomoBody": "Buyers see low stock and recent buys; suppliers see orders containing their SKUs in the same stream.",
+    "fomoBullet1": "Auto status pipeline with BFF + service role (demo).",
+    "fomoBullet2": "Categories and wholesale tiers are clear on the product card.",
+    "categoriesTitle": "Categories",
+    "categoriesHint": "After sign-in open the catalog — filters and search are in the app.",
+    "partnerTitle": "Partner with us",
+    "partnerSubtitle": "Leave your contact — we’ll reach out (demo: UI only).",
+    "formEmail": "Email",
+    "formNote": "Company, volume, region",
+    "formSubmit": "Send request",
+    "formThanks": "Request received",
+    "formNeedEmail": "Email is required",
+    "formDisclaimer": "By submitting you agree to be contacted about partnership.",
+    "footerCopy": "© OptBirja · wholesale exchange",
+    "footerTelegram": "Telegram",
+    "footerLinkedIn": "LinkedIn",
+    "footerEmail": "hello@optbirja.local",
+    "footerMarket": "Demo marketplace"
   },
   "productDetail": {
     "priceHint": "Per unit for selected quantity (wholesale)",
@@ -186,11 +267,26 @@
     "grandSavings": "Savings: {{amount}} {{currency}}",
     "addToCart": "Add to cart",
     "buyNow": "Buy now",
+    "buyOneClick": "One-tap order",
+    "buyOneClickHint": "Add to cart and go to checkout",
     "supplier": "Supplier",
     "delivery": "Delivery",
     "deliveryEta": "1–2 days · free from {{amount}} {{currency}}",
     "priceHistory": "Price history",
-    "tierRange": "{{min}}–{{max}} {{units}}"
+    "tierRange": "{{min}}–{{max}} {{units}}",
+    "loading": "Loading…",
+    "notFound": "Product not found",
+    "toCatalog": "Back to catalog",
+    "backNav": "Back",
+    "carouselPrev": "Previous image",
+    "carouselNext": "Next image",
+    "chooseImage": "Show image {{n}}",
+    "thumbnailAlt": "Thumbnail {{n}}",
+    "toastAdded": "Added to cart",
+    "toastAddedDesc": "{{name}} × {{count}} {{units}}",
+    "toastGoCart": "Go to cart",
+    "ariaQtyMinus": "Decrease quantity",
+    "ariaQtyPlus": "Increase quantity"
   },
   "productCard": {
     "top": "TOP",
@@ -226,7 +322,10 @@
     "empty": "No products yet",
     "discountPh": "discount",
     "save": "Save price & stock",
-    "saved": "Saved"
+    "saved": "Saved",
+    "incomingOrders": "Orders with your products",
+    "noOrdersYet": "No orders for your SKUs yet",
+    "ordersRealtimeHint": "List refreshes via Supabase Realtime on status changes."
   },
   "admin": {
     "title": "Admin",
@@ -239,6 +338,7 @@
     "apply": "Apply",
     "updated": "Updated",
     "tabOverview": "Overview",
+    "tabOrders": "Orders",
     "tabCatalog": "Catalog",
     "tabSuppliers": "Suppliers",
     "tabBroadcast": "Broadcast",
@@ -267,7 +367,10 @@
     "alertsLowStock": "Low stock (<20)",
     "alertsHot": "Hot deals (>20% off)",
     "noAlerts": "No threshold alerts right now",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "ordersPanelHint": "Statuses & tracking; with BFF+service role the demo runs paid → shipped → completed.",
+    "ordersEmpty": "No orders yet",
+    "orderStatusUpdated": "Order status updated"
   },
   "errors": {
     "rpc": {

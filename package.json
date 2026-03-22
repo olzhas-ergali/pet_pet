@@ -9,7 +9,13 @@
     "dev:bff": "tsx watch server/index.ts",
     "dev:full": "concurrently -k \"npm run dev:bff\" \"vite\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:smoke": "vitest run src/app/App.smoke.test.tsx",
+    "db:start": "npx supabase@latest start",
+    "db:stop": "npx supabase@latest stop",
+    "db:status": "npx supabase@latest status",
+    "db:reset": "npx supabase@latest db reset",
+    "docs:print": "node -e \"console.log('Откройте в браузере: http://localhost:5173/report-print.html (после npm run dev) или файл public/report-print.html')\""
   },
   "dependencies": {
     "@emotion/react": "11.14.0",

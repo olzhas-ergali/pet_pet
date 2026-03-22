@@ -37,6 +37,8 @@
     "changePhone": "Нөмірді өзгерту",
     "login": "Кіру",
     "terms": "«Код алу» батырмасын басу арқылы сіз қызмет ережелеріне келісесіз.",
+    "backToLanding": "← Басты бетке",
+    "passwordPlaceholder": "Құпия сөз",
     "toastNoEnv": "VITE_SUPABASE_URL / ANON_KEY жоқ",
     "toastCodeSent": "Код жіберілді",
     "toastWelcome": "Қош келдіңіз!",
@@ -60,7 +62,10 @@
     "emptyDbHint": "Supabase қосылымын және seed деректерін тексеріңіз, содан кейін бетті жаңартыңыз.",
     "emptyFilter": "Ештеңе табылмады",
     "emptyFilterHint": "Іздеу немесе сүзгілерді өзгертіп көріңіз",
-    "resetFilters": "Сүзгілерді тазалау"
+    "resetFilters": "Сүзгілерді тазалау",
+    "loadError": "Каталог жүктелмеді",
+    "loadErrorRetry": "Қайталау",
+    "clearSearch": "Іздеуді тазалау"
   },
   "cart": {
     "title": "Себет",
@@ -89,7 +94,10 @@
     "productMissing": "Тауар каталогта жоқ немесе қолжетімсіз",
     "checkoutBlocked": "Себетті түзеңіз: қолжетімсіз позициялар немесе қалдық",
     "removeInvalid": "Қолжетімсіз позицияларды жою",
-    "invalidCleared": "Жойылды: {{count}} поз."
+    "invalidCleared": "Жойылды: {{count}} поз.",
+    "ariaDecreaseQty": "Санын азайту",
+    "ariaIncreaseQty": "Санын арттыру",
+    "ariaRemoveItem": "{{name}} себеттен жою"
   },
   "checkout": {
     "title": "Рәсімдеу",
@@ -116,7 +124,13 @@
     "toastLoadCatalogDesc": "Төмендегі «Жаңарту» батырмасын басыңыз",
     "toastSuccess": "Тапсырыс жасалды",
     "toastStock": "Тауар жеткіліксіз",
-    "toastFail": "Рәсімдеу сәтсіз"
+    "toastFail": "Рәсімдеу сәтсіз",
+    "shippingTitle": "Алушы және жеткізу",
+    "shippingHint": "Логистика мен хабарламалар үшін — ұсынылады.",
+    "shippingPhone": "Алушы телефоны",
+    "shippingAddress": "Мекенжай (көше, үй)",
+    "shippingCity": "Қала",
+    "emptyHint": "Себетке тауар қосыңыз немесе каталогтан таңдаңыз."
   },
   "orderSuccess": {
     "title": "Тапсырыс рәсімделді",
@@ -145,7 +159,27 @@
     "personal": "Жеке деректер",
     "addresses": "Жеткізу мекенжайлары",
     "payment": "Төлем әдістері",
-    "notifications": "Хабарландырулар"
+    "notifications": "Хабарландырулар",
+    "tracking": "Трек",
+    "ordersError": "Тапсырыстар жүктелмеді. Желіні тексеріп, қайталаңыз.",
+    "ordersRetry": "Тізімді жаңарту",
+    "noOrdersYet": "Тапсырыс жоқ — каталогты қараңыз.",
+    "backToProfile": "Профильге оралу",
+    "personalPageTitle": "Жеке деректер",
+    "personalPageHint": "Supabase аккаунтыңыздан алынған деректер.",
+    "fieldPhone": "Телефон",
+    "fieldEmail": "Email",
+    "fieldDisplayName": "Аты",
+    "addressesPageTitle": "Жеткізу мекенжайлары",
+    "addressesPageHint": "Сақталған мекенжайлар логистика қосылғанда осында болады.",
+    "addressesEmpty": "Сақталған мекенжай жоқ.",
+    "paymentPageTitle": "Төлем әдістері",
+    "paymentPageHint": "Карталар мен шоттар — келесі нұсқаларда.",
+    "paymentEmpty": "Төлем әдістері қосылмаған.",
+    "notificationsPageTitle": "Хабарландырулар",
+    "notificationsPageHint": "Арналар (демо):",
+    "notificationsItemPrices": "Бағалардың нақты уақыттағы өзгерістері",
+    "notificationsItemOrders": "Тапсырыс статустары"
   },
   "home": {
     "tagline": "Тікелей оптикалық бағалар",
@@ -162,7 +196,8 @@
     "sectionLow": "Тез сатылып жатыр",
     "sectionLowSub": "Өте аз қалды",
     "notFound": "Тауар табылмады",
-    "notFoundHint": ".env тексеріңіз немесе басқа санат таңдаңыз"
+    "notFoundHint": ".env тексеріңіз немесе басқа санат таңдаңыз",
+    "bellAria": "Хабарландырулар (жақында)"
   },
   "fomo": {
     "title": "Біреу жаңа ғана сатып алды",
@@ -172,7 +207,53 @@
   "realtime": {
     "pricesBatch": "Бағалар жаңартылды ({{count}} поз.)",
     "disconnected": "Баға ағыны уақытша жоқ. Каталог ескірген болуы мүмкін.",
-    "retrySync": "Каталогты жаңарту"
+    "retrySync": "Каталогты жаңарту",
+    "ordersSynced": "Тапсырыстар нақты уақытта жаңартылды"
+  },
+  "orders": {
+    "status": {
+      "pending": "Төлем күтуде",
+      "paid": "Төленді",
+      "shipped": "Жолда",
+      "cancelled": "Болдырылмады",
+      "completed": "Аяқталды"
+    }
+  },
+  "landing": {
+    "brand": "OptBirja",
+    "brandSub": "Тікелей оптикалық биржа",
+    "signIn": "Кіру",
+    "toCatalog": "Каталогқа",
+    "liveBadge": "Нақты уақытта баға мен қалдық",
+    "heroTitle": "Тікелей оптикалық тауар биржасы — серіктестік мүмкін",
+    "heroSubtitle": "Таңдаудан тапсырысқа бір рет басыңыз: серверде бағаны бекіту, қойма тексеру, жеткізу статустары мен хабарламалар.",
+    "ctaPrimary": "Каталогты ашу",
+    "ctaSecondary": "Серіктес болу",
+    "benefit1Title": "Тікелей бағалар",
+    "benefit1Body": "Postgres Realtime — жаңа баға мен FOMO сигналдарын жүктемей көріңіз.",
+    "benefit2Title": "Қойма бақылауда",
+    "benefit2Body": "submit_order RPC жол бағасын бекітеді — дау азаяды.",
+    "benefit3Title": "Рөлдер тізбегі",
+    "benefit3Body": "Клиент → жеткізуші → логистика: оқиға кезегі, Telegram нұсқауы.",
+    "fomoTitle": "Сұраныс динамикасы",
+    "fomoBody": "Сатып алушылар «аз қалды» көреді; жеткізушілер өз тауарлары бар тапсырыстарды көреді.",
+    "fomoBullet1": "BFF + service role қосқанда демо статустар жүргізіледі.",
+    "fomoBullet2": "Санаттар мен оптикалық деңгейлер карточкада анық.",
+    "categoriesTitle": "Санаттар",
+    "categoriesHint": "Кіргеннен кейін каталогты ашыңыз — сүзгі мен іздеу қолданбада.",
+    "partnerTitle": "Серіктес болыңыз",
+    "partnerSubtitle": "Байланыс қалдырыңыз (демо: тек интерфейс).",
+    "formEmail": "Email",
+    "formNote": "Компания, көлем, аймақ",
+    "formSubmit": "Жіберу",
+    "formThanks": "Өтініш қабылданды",
+    "formNeedEmail": "Email енгізіңіз",
+    "formDisclaimer": "Жіберу арқылы байланыс деректерін өңдеуге келісесіз.",
+    "footerCopy": "© OptBirja · оптикалық биржа",
+    "footerTelegram": "Telegram",
+    "footerLinkedIn": "LinkedIn",
+    "footerEmail": "hello@optbirja.local",
+    "footerMarket": "Демо витрина"
   },
   "productDetail": {
     "priceHint": "Таңдалған саны бойынша 1 дана бағасы (опт)",
@@ -186,11 +267,26 @@
     "grandSavings": "Үнемдеу: {{amount}} {{currency}}",
     "addToCart": "Себетке",
     "buyNow": "Қазір сатып алу",
+    "buyOneClick": "1 басумен тапсырыс",
+    "buyOneClickHint": "Себетке қосу және рәсімдеуге",
     "supplier": "Жеткізуші",
     "delivery": "Жеткізу",
     "deliveryEta": "1–2 күн · {{amount}} {{currency}} бастап тегін",
     "priceHistory": "Баға тарихы",
-    "tierRange": "{{min}}–{{max}} {{units}}"
+    "tierRange": "{{min}}–{{max}} {{units}}",
+    "loading": "Жүктелуде…",
+    "notFound": "Тауар табылмады",
+    "toCatalog": "Каталогқа",
+    "backNav": "Артқа",
+    "carouselPrev": "Алдыңғы сурет",
+    "carouselNext": "Келесі сурет",
+    "chooseImage": "Сурет {{n}} көрсету",
+    "thumbnailAlt": "Шағын сурет {{n}}",
+    "toastAdded": "Себетке қосылды",
+    "toastAddedDesc": "{{name}} × {{count}} {{units}}",
+    "toastGoCart": "Себетке",
+    "ariaQtyMinus": "Санын азайту",
+    "ariaQtyPlus": "Санын арттыру"
   },
   "productCard": {
     "top": "ТОП",
@@ -226,7 +322,10 @@
     "empty": "Тауарлар жоқ",
     "discountPh": "жеңілдік",
     "save": "Баға мен қалдықты сақтау",
-    "saved": "Сақталды"
+    "saved": "Сақталды",
+    "incomingOrders": "Сіздің тауарларыңызбен тапсырыстар",
+    "noOrdersYet": "Әзірге мұндай тапсырыс жоқ",
+    "ordersRealtimeHint": "Тізім Supabase Realtime арқылы статус өзгергенде жаңарады."
   },
   "admin": {
     "title": "Әкімші",
@@ -239,6 +338,7 @@
     "apply": "Қолдану",
     "updated": "Жаңартылды",
     "tabOverview": "Шолу",
+    "tabOrders": "Тапсырыстар",
     "tabCatalog": "Каталог",
     "tabSuppliers": "Жеткізушілер",
     "tabBroadcast": "Хабарламалар",
@@ -267,7 +367,10 @@
     "alertsLowStock": "Төмен қалдық (<20)",
     "alertsHot": "Ыстық жеңілдіктер (>20%)",
     "noAlerts": "Шектен ескертулер жоқ",
-    "refresh": "Жаңарту"
+    "refresh": "Жаңарту",
+    "ordersPanelHint": "Статустар мен трек; BFF+service role демода paid → shipped → completed.",
+    "ordersEmpty": "Тапсырыс жоқ",
+    "orderStatusUpdated": "Статус жаңартылды"
   },
   "errors": {
     "rpc": {

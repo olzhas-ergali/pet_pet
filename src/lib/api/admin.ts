@@ -1,4 +1,5 @@
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client';
+import type { OrderRow } from '@/types/database';
 
 export type AdminSalesOverview = {
   total_orders: number;
@@ -43,6 +44,28 @@ export async function adminEnqueueNotification(params: {
 }
 
 /** Массовая скидка: discount_price = base * (1 - percent/100). p_category null/пусто — все товары */
+export async function fetchAdminOrders(): Promise<OrderRow[]> {
+  if (!isSupabaseConfigured) return [];
+  const supabase = getSupabase()!;
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(150);
+  if (error) throw error;
+  return (data ?? []) as OrderRow[];
+}
+
+export async function adminSetOrderStatus(orderId: string, status: string): Promise<void> {
+  if (!isSupabaseConfigured) throw new Error('no supabase');
+  const supabase = getSupabase()!;
+  const { error } = await supabase.rpc('admin_set_order_status', {
+    p_order_id: orderId,
+    p_status: status,
+  });
+  if (error) throw error;
+}
+
 export async function adminBulkApplyDiscountPercent(
   category: string | null,
   percent: number

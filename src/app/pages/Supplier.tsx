@@ -1,25 +1,32 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Package, Plus } from 'lucide-react';
+import { Package, Plus, ClipboardList } from 'lucide-react';
 import { toast } from 'sonner';
 import { BottomNav } from '../components/BottomNav';
 import { useAuthStore } from '@/store/authStore';
 import {
   createSupplierProduct,
   fetchMySupplierProducts,
+  fetchSupplierOrdersDashboard,
   updateProductPrice,
   updateProductStock,
+  type SupplierOrderRow,
 } from '@/lib/api/supplier';
 import { mapRpcUserMessage } from '@/lib/api/orderErrors';
 import type { Product } from '../types';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { CATEGORY_ID_TO_DB } from '@/lib/catalogCategories';
+import { useOrderFeedStore } from '@/store/orderFeedStore';
+import { formatNumberAmount } from '@/i18n/format';
 
 export function Supplier() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = useAuthStore((s) => s.user);
+  const orderTick = useOrderFeedStore((s) => s.tick);
   const [list, setList] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [incomingOrders, setIncomingOrders] = useState<SupplierOrderRow[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -52,6 +59,28 @@ export function Supplier() {
   useEffect(() => {
     void reload();
   }, [canAccess]);
+
+  useEffect(() => {
+    if (!canAccess || !isSupabaseConfigured) {
+      setIncomingOrders([]);
+      return;
+    }
+    let alive = true;
+    setOrdersLoading(true);
+    void fetchSupplierOrdersDashboard()
+      .then((rows) => {
+        if (alive) setIncomingOrders(rows);
+      })
+      .catch(() => {
+        if (alive) setIncomingOrders([]);
+      })
+      .finally(() => {
+        if (alive) setOrdersLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [canAccess, orderTick]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +125,41 @@ export function Supplier() {
             <code className="block bg-white/80 px-2 py-1 rounded text-xs break-all">
               {t('supplier.roleHintSql')}
             </code>
+          </div>
+        )}
+
+        {canAccess && (
+          <div className="bg-white rounded-2xl shadow-sm p-5 space-y-3">
+            <h2 className="font-semibold flex items-center gap-2">
+              <ClipboardList className="w-5 h-5 text-emerald-600" />
+              {t('supplier.incomingOrders')}
+            </h2>
+            {ordersLoading ? (
+              <p className="text-sm text-gray-500">{t('common.loading')}</p>
+            ) : incomingOrders.length === 0 ? (
+              <p className="text-sm text-gray-500">{t('supplier.noOrdersYet')}</p>
+            ) : (
+              <ul className="space-y-2 text-sm">
+                {incomingOrders.slice(0, 12).map((o) => (
+                  <li
+                    key={o.id}
+                    className="flex flex-wrap justify-between gap-2 border border-gray-100 rounded-xl px-3 py-2"
+                  >
+                    <span className="font-mono text-xs text-gray-500">{o.id.slice(0, 8)}…</span>
+                    <span className="font-medium">
+                      {formatNumberAmount(Number(o.total_amount), i18n.language)} {t('common.currency')}
+                    </span>
+                    <span className="text-emerald-600">{t(`orders.status.${o.status}`)}</span>
+                    {o.tracking_number ? (
+                      <span className="text-xs text-gray-500 w-full">
+                        {t('profile.tracking')}: {o.tracking_number}
+                      </span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="text-xs text-gray-400">{t('supplier.ordersRealtimeHint')}</p>
           </div>
         )}
 

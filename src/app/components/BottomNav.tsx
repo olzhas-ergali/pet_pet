@@ -8,11 +8,27 @@ export function BottomNav() {
   const location = useLocation();
   const cartCount = useCartStore(selectCartCount);
 
-  const navItems = [
-    { icon: Home, label: t('nav.home'), path: '/' },
-    { icon: Search, label: t('nav.catalog'), path: '/catalog' },
+  const navItems: {
+    icon: typeof Home;
+    label: string;
+    path: string;
+    match?: (pathname: string) => boolean;
+    badge?: number;
+  }[] = [
+    { icon: Home, label: t('nav.home'), path: '/market' },
+    {
+      icon: Search,
+      label: t('nav.catalog'),
+      path: '/catalog',
+      match: (p) => p === '/catalog' || p.startsWith('/product/'),
+    },
     { icon: ShoppingCart, label: t('nav.cart'), path: '/cart', badge: cartCount },
-    { icon: User, label: t('nav.profile'), path: '/profile' },
+    {
+      icon: User,
+      label: t('nav.profile'),
+      path: '/profile',
+      match: (p) => p === '/profile' || p.startsWith('/profile/'),
+    },
   ];
 
   return (
@@ -20,7 +36,9 @@ export function BottomNav() {
       <div className="flex items-center justify-around py-2 safe-bottom">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+          const isActive = item.match
+            ? item.match(location.pathname)
+            : location.pathname === item.path;
 
           return (
             <Link

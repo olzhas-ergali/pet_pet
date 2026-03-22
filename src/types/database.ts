@@ -43,4 +43,8 @@ export type OrderRow = {
   total_amount: number;
   status: string;
   created_at: string;
+  updated_at?: string;
+  tracking_number?: string | null;
+  shipping_address?: Record<string, unknown> | null;
+  recipient_phone?: string | null;
 };

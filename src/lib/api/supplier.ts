@@ -95,3 +95,23 @@ export async function fetchMySupplierProducts(): Promise<Product[]> {
   if (error) throw error;
   return (data as ProductRow[]).map((row) => mapProductRow(row));
 }
+
+export type SupplierOrderRow = {
+  id: string;
+  user_id: string;
+  status: string;
+  total_amount: number;
+  tracking_number: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export async function fetchSupplierOrdersDashboard(): Promise<SupplierOrderRow[]> {
+  if (!isSupabaseConfigured) return [];
+  const supabase = getSupabase()!;
+  const { data, error } = await supabase.rpc('supplier_orders_dashboard');
+  if (error) throw error;
+  if (data == null) return [];
+  if (Array.isArray(data)) return data as SupplierOrderRow[];
+  return [];
+}

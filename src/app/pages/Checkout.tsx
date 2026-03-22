@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, AlertCircle, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import { BottomNav } from '../components/BottomNav';
 import { Skeleton } from '../components/ui/skeleton';
@@ -26,6 +26,7 @@ export function Checkout() {
   const items = useCartStore((s) => s.items);
   const products = useProductStore((s) => s.products);
   const productsLoading = useProductStore((s) => s.loading);
+  const catalogError = useProductStore((s) => s.error);
   const loadProducts = useProductStore((s) => s.load);
   const createOrder = useOrderStore((s) => s.createOrderFromCart);
   const orderError = useOrderStore((s) => s.error);
@@ -33,6 +34,9 @@ export function Checkout() {
   const submitting = useOrderStore((s) => s.submitting);
 
   const [note, setNote] = useState('');
+  const [recipientPhone, setRecipientPhone] = useState('');
+  const [addressLine, setAddressLine] = useState('');
+  const [city, setCity] = useState('');
   const [phase, setPhase] = useState<Phase>('idle');
   const [stockMessage, setStockMessage] = useState<string | null>(null);
   const [bffQuote, setBffQuote] = useState<CartQuote | null>(null);
@@ -125,7 +129,17 @@ export function Checkout() {
       }
 
       setPhase('submitting');
-      const id = await createOrder(payload);
+      const meta =
+        recipientPhone.trim() || addressLine.trim() || city.trim()
+          ? {
+              recipient_phone: recipientPhone.trim() || undefined,
+              shipping_address: {
+                ...(addressLine.trim() ? { line1: addressLine.trim() } : {}),
+                ...(city.trim() ? { city: city.trim() } : {}),
+              },
+            }
+          : undefined;
+      const id = await createOrder(payload, meta);
       if (note) localStorage.setItem(`order_note_${id}`, note);
       toast.success(t('checkout.toastSuccess'));
       navigate(`/order-success?id=${encodeURIComponent(id)}`, { replace: true });
@@ -149,8 +163,24 @@ export function Checkout() {
             <h1 className="text-2xl font-bold mt-2">{t('checkout.title')}</h1>
           </div>
         </header>
-        <div className="container mx-auto px-4 py-16 text-center text-gray-600">
-          {t('checkout.empty')}
+        <div className="container mx-auto px-4 py-16 text-center max-w-md">
+          <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" strokeWidth={1.25} aria-hidden />
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('checkout.empty')}</h2>
+          <p className="text-gray-500 mb-8 text-sm leading-relaxed">{t('checkout.emptyHint')}</p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/catalog"
+              className="inline-flex justify-center items-center rounded-2xl bg-emerald-600 text-white font-semibold px-6 py-3 hover:bg-emerald-700 transition-colors"
+            >
+              {t('cart.toCatalog')}
+            </Link>
+            <Link
+              to="/cart"
+              className="inline-flex justify-center items-center rounded-2xl border-2 border-gray-200 font-semibold px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              {t('checkout.backToCart')}
+            </Link>
+          </div>
         </div>
         <BottomNav />
       </div>
@@ -177,6 +207,20 @@ export function Checkout() {
         onSubmit={handleSubmit}
         className="container mx-auto px-4 py-6 max-w-lg space-y-6"
       >
+        {catalogError && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+            <p className="font-medium">{t('catalog.loadError')}</p>
+            <p className="text-amber-900/90 mt-1">{catalogError}</p>
+            <button
+              type="button"
+              onClick={() => void loadProducts()}
+              className="mt-2 text-sm font-semibold text-emerald-700 underline"
+            >
+              {t('catalog.loadErrorRetry')}
+            </button>
+          </div>
+        )}
+
         {checkoutHardBlock && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
             <p className="font-medium">{t('cart.productMissing')}</p>
@@ -237,6 +281,38 @@ export function Checkout() {
             })}
           </div>
         )}
+
+        <div className="bg-white rounded-2xl shadow-sm p-5 space-y-4">
+          <h2 className="font-semibold text-gray-900">{t('checkout.shippingTitle')}</h2>
+          <p className="text-xs text-gray-500">{t('checkout.shippingHint')}</p>
+          <input
+            type="tel"
+            value={recipientPhone}
+            onChange={(e) => setRecipientPhone(e.target.value)}
+            disabled={busy}
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-emerald-500 focus:outline-none disabled:opacity-50"
+            placeholder={t('checkout.shippingPhone')}
+            autoComplete="tel"
+          />
+          <input
+            type="text"
+            value={addressLine}
+            onChange={(e) => setAddressLine(e.target.value)}
+            disabled={busy}
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-emerald-500 focus:outline-none disabled:opacity-50"
+            placeholder={t('checkout.shippingAddress')}
+            autoComplete="street-address"
+          />
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            disabled={busy}
+            className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-emerald-500 focus:outline-none disabled:opacity-50"
+            placeholder={t('checkout.shippingCity')}
+            autoComplete="address-level2"
+          />
+        </div>
 
         <div className="bg-white rounded-2xl shadow-sm p-5 space-y-2">
           <label className="text-sm font-semibold text-gray-700">{t('checkout.comment')}</label>

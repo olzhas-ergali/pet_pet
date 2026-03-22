@@ -5,6 +5,11 @@ import { isBffEnabled, bffFetchJson, bffValidateCart } from '@/lib/api/bff';
 
 export type CartLineInput = { product_id: string; quantity: number };
 
+export type OrderSubmitMeta = {
+  recipient_phone?: string;
+  shipping_address?: Record<string, string>;
+};
+
 export async function validateCartStock(lines: CartLineInput[]): Promise<ValidateCartResult> {
   if (!isSupabaseConfigured) return { ok: false, code: 'no_config' };
 
@@ -39,13 +44,13 @@ export async function validateCartStock(lines: CartLineInput[]): Promise<Validat
   };
 }
 
-export async function submitOrder(lines: CartLineInput[]): Promise<string> {
+export async function submitOrder(lines: CartLineInput[], meta?: OrderSubmitMeta): Promise<string> {
   if (!isSupabaseConfigured) throw new Error('Supabase не настроен');
 
   if (isBffEnabled()) {
     const { orderId } = await bffFetchJson<{ orderId: string }>('/orders', {
       method: 'POST',
-      body: JSON.stringify({ lines }),
+      body: JSON.stringify({ lines, meta: meta ?? {} }),
     });
     return orderId;
   }
@@ -53,6 +58,7 @@ export async function submitOrder(lines: CartLineInput[]): Promise<string> {
   const supabase = getSupabase()!;
   const { data, error } = await supabase.rpc('submit_order', {
     p_items: lines,
+    p_meta: meta ?? {},
   });
   if (error) throw error;
   return data as string;

@@ -24,7 +24,8 @@ services:
       - "8080:80"
     restart: unless-stopped
 
-  # Локальный Postgres (опционально). Полный Realtime/Auth — через Supabase Cloud или `supabase start`.
+  # Только Postgres без Supabase: миграции из `supabase/migrations/` не применятся как есть
+  # (нужны auth.users, publication supabase_realtime). Для разработки — `npm run db:start`.
   db:
     image: postgres:16-alpine
     environment:
@@ -35,8 +36,11 @@ services:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-    profiles:
-      - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U optbirja -d optbirja"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   pgdata:

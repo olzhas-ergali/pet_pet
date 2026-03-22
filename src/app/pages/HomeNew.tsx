@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TrendingDown, Flame, Package2, Bell, Zap } from 'lucide-react';
 import { ProductCardNew } from '../components/ProductCardNew';
@@ -9,7 +9,9 @@ import { Product } from '../types';
 import { motion } from 'motion/react';
 import { useProductStore } from '@/store/productStore';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
-import { CATEGORY_ALL, CATEGORY_ID_TO_DB, matchesCategoryFilter } from '@/lib/catalogCategories';
+import { CATEGORY_ALL } from '@/lib/catalogCategories';
+import { filterProductsByCategory } from '@/lib/catalog/catalogFilters';
+import { useCategoryOptions } from '@/hooks/useCategoryOptions';
 
 export function HomeNew() {
   const { t } = useTranslation();
@@ -21,16 +23,7 @@ export function HomeNew() {
   const [selectedCategory, setSelectedCategory] = useState(CATEGORY_ALL);
   const [refreshing, setRefreshing] = useState(false);
 
-  const categoryOptions = useMemo(
-    () => [
-      { id: CATEGORY_ALL, label: t('catalog.category.all') },
-      ...Object.keys(CATEGORY_ID_TO_DB).map((id) => ({
-        id,
-        label: t(`catalog.category.${id}`),
-      })),
-    ],
-    [t]
-  );
+  const categoryOptions = useCategoryOptions();
 
   useEffect(() => {
     void load();
@@ -42,9 +35,7 @@ export function HomeNew() {
     setRefreshing(false);
   };
 
-  const filteredProducts = products.filter((p) =>
-    matchesCategoryFilter(p.category, selectedCategory)
-  );
+  const filteredProducts = filterProductsByCategory(products, selectedCategory);
 
   const hotDeals = products
     .filter((p) => p.discount && p.discount > 20)
@@ -74,9 +65,13 @@ export function HomeNew() {
               <div className="h-9 w-36 rounded-lg bg-gray-100" aria-label="Logo" />
               <p className="text-sm text-gray-500 mt-0.5">{t('home.tagline')}</p>
             </div>
-            <button type="button" className="relative p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <Bell className="w-6 h-6 text-gray-700" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            <button
+              type="button"
+              className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label={t('home.bellAria')}
+            >
+              <Bell className="w-6 h-6 text-gray-700" aria-hidden />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" aria-hidden />
             </button>
           </div>
         </div>

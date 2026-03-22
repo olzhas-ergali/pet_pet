@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { TrendingUp, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -10,7 +10,6 @@ import { useAuthStore } from '@/store/authStore';
 import { getPostLoginDestination } from '@/lib/auth/navigation';
 import { mapRpcUserMessage } from '@/lib/api/orderErrors';
 import { SessionSplash } from '../components/SessionSplash';
-import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 const devEmail = import.meta.env.VITE_DEV_LOGIN_EMAIL;
 const devPassword = import.meta.env.VITE_DEV_LOGIN_PASSWORD;
@@ -92,59 +91,63 @@ export function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 flex items-center justify-center px-4 relative">
-      <div className="fixed top-3 right-3 z-50 bg-white/90 backdrop-blur rounded-2xl px-2 py-1.5 shadow-sm border border-gray-100">
-        <LanguageSwitcher />
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-12 relative">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl mb-6 shadow-lg shadow-emerald-500/30"
+            className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-3xl mb-6 shadow-lg shadow-amber-500/25"
           >
-            <TrendingUp className="w-10 h-10 text-white" />
+            <TrendingUp className="w-10 h-10 text-stone-950" />
           </motion.div>
-          <div className="h-10 w-40 mx-auto rounded-xl bg-gray-100 mb-4" aria-hidden />
-          <p className="text-gray-600 text-lg">{t('auth.tagline')}</p>
+          <p className="text-stone-300 text-lg mb-4">{t('auth.tagline')}</p>
+          <Link
+            to="/"
+            className="text-sm text-amber-400/90 hover:text-amber-300 transition-colors"
+          >
+            {t('auth.backToLanding')}
+          </Link>
         </div>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-8 space-y-6"
+          className="bg-stone-900/85 border border-white/10 backdrop-blur-md rounded-3xl p-8 space-y-6 shadow-2xl shadow-black/40"
         >
           {!isSupabaseConfigured && (
-            <p className="text-sm text-amber-700 bg-amber-50 rounded-xl p-3">{t('auth.noEnv')}</p>
+            <p className="text-sm text-amber-200 bg-amber-500/15 border border-amber-500/30 rounded-xl p-3">
+              {t('auth.noEnv')}
+            </p>
           )}
 
           {showDevLogin && (
-            <form onSubmit={handleDevLogin} className="space-y-3 pb-4 border-b border-gray-100">
-              <p className="text-xs font-semibold text-gray-500 uppercase">{t('auth.devLogin')}</p>
+            <form onSubmit={handleDevLogin} className="space-y-3 pb-4 border-b border-white/10">
+              <p className="text-xs font-semibold text-stone-400 uppercase">{t('auth.devLogin')}</p>
               <input
                 type="email"
                 value={devE}
                 onChange={(e) => setDevE(e.target.value)}
-                className="w-full px-4 py-3 border-2 rounded-xl"
+                className="w-full px-4 py-3 rounded-xl bg-stone-950 border border-white/15 text-stone-100 placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
                 placeholder="Email"
               />
               <input
                 type="password"
                 value={devP}
                 onChange={(e) => setDevP(e.target.value)}
-                className="w-full px-4 py-3 border-2 rounded-xl"
-                placeholder="Пароль"
+                className="w-full px-4 py-3 rounded-xl bg-stone-950 border border-white/15 text-stone-100 placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
+                placeholder={t('auth.passwordPlaceholder')}
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-gray-900 text-white font-semibold disabled:opacity-50"
+                className="w-full py-3 rounded-xl bg-stone-100 text-stone-900 font-semibold hover:bg-white disabled:opacity-50 transition-colors"
               >
                 {t('auth.devLoginSubmit')}
               </button>
@@ -154,7 +157,7 @@ export function Auth() {
           {step === 'phone' ? (
             <form onSubmit={handlePhoneSubmit}>
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <label className="block text-sm font-semibold text-stone-300 mb-3">
                   {t('auth.phone')}
                 </label>
                 <input
@@ -162,7 +165,7 @@ export function Auth() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+7 (___) ___-__-__"
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-emerald-500 focus:bg-white focus:outline-none transition-all text-lg"
+                  className="w-full px-5 py-4 bg-stone-950 border border-white/15 rounded-2xl focus:border-emerald-500/60 focus:outline-none transition-all text-lg text-stone-100 placeholder:text-stone-500"
                   required
                 />
               </div>
@@ -170,7 +173,7 @@ export function Auth() {
               <button
                 type="submit"
                 disabled={loading || !isSupabaseConfigured}
-                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-emerald-700 hover:to-emerald-600 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-stone-950 py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   t('auth.sending')
@@ -185,7 +188,7 @@ export function Auth() {
           ) : (
             <form onSubmit={handleOtpSubmit}>
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <label className="block text-sm font-semibold text-stone-300 mb-3">
                   {t('auth.otp')}
                 </label>
                 <input
@@ -194,13 +197,13 @@ export function Auth() {
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="• • • • • •"
                   maxLength={8}
-                  className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-emerald-500 focus:bg-white focus:outline-none transition-all text-2xl tracking-widest text-center"
+                  className="w-full px-5 py-4 bg-stone-950 border border-white/15 rounded-2xl focus:border-emerald-500/60 focus:outline-none transition-all text-2xl tracking-widest text-center text-stone-100 placeholder:text-stone-600"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setStep('phone')}
-                  className="text-sm text-gray-500 mt-3 hover:text-gray-700"
+                  className="text-sm text-stone-400 mt-3 hover:text-stone-200"
                 >
                   {t('auth.changePhone')}
                 </button>
@@ -209,7 +212,7 @@ export function Auth() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-emerald-700 hover:to-emerald-600 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-stone-950 py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   t('auth.checking')
@@ -224,7 +227,9 @@ export function Auth() {
           )}
         </motion.div>
 
-        <p className="text-center text-sm text-gray-500 mt-8">{t('auth.terms')}</p>
+        <p className="text-center text-sm text-stone-500 mt-8 max-w-sm mx-auto leading-relaxed">
+          {t('auth.terms')}
+        </p>
       </motion.div>
     </div>
   );

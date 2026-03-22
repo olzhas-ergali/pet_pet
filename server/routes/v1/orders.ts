@@ -28,13 +28,15 @@ r.post('/', async (req, res) => {
       res.status(400).json({ error: 'lines required' });
       return;
     }
+    const meta = (req.body?.meta as Record<string, unknown> | undefined) ?? {};
+
     const supabase = createUserClient(req.accessToken!);
     const raw = (await validateCartStockRpc(supabase, lines)) as { ok?: boolean };
     if (raw.ok !== true) {
       res.status(400).json(raw);
       return;
     }
-    const orderId = await submitOrderRpc(supabase, lines);
+    const orderId = await submitOrderRpc(supabase, lines, meta);
     const { data: ord, error: oe } = await supabase
       .from('orders')
       .select('total_amount')

@@ -6,11 +6,15 @@ describe('getPostLoginDestination', () => {
     expect(getPostLoginDestination('/checkout')).toBe('/checkout');
   });
 
-  it('не возвращает /auth', () => {
-    expect(getPostLoginDestination('/auth')).toBe('/');
+  it('не возвращает /auth — ведёт на витрину', () => {
+    expect(getPostLoginDestination('/auth')).toBe('/market');
   });
 
-  it('fallback на главную', () => {
-    expect(getPostLoginDestination(undefined)).toBe('/');
+  it('fallback на витрину', () => {
+    expect(getPostLoginDestination(undefined)).toBe('/market');
+  });
+
+  it('с лендинга / ведёт на витрину, не на публичную главную', () => {
+    expect(getPostLoginDestination('/')).toBe('/market');
   });
 });

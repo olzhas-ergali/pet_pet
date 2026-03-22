@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { submitOrder, type CartLineInput } from '@/lib/api/orders';
+import { submitOrder, type CartLineInput, type OrderSubmitMeta } from '@/lib/api/orders';
 import { mapSubmitOrderError } from '@/lib/api/orderErrors';
 import { useCartStore } from '@/store/cartStore';
 
@@ -16,10 +16,10 @@ export const useOrderStore = create<OrderState>((set) => ({
 
   clearOrderError: () => set({ error: null }),
 
-  createOrderFromCart: async (lines) => {
+  createOrderFromCart: async (lines, meta) => {
     set({ submitting: true, error: null });
     try {
-      const id = await submitOrder(lines);
+      const id = await submitOrder(lines, meta);
       useCartStore.getState().clearCart();
       set({ submitting: false, error: null });
       return id;

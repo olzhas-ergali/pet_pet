@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router';
 import {
   ArrowLeft,
@@ -112,10 +112,19 @@ export function ProductDetailNew() {
     };
   }, [product?.id, quantity]);
 
+  const chartData = useMemo(() => {
+    if (!product?.priceHistory?.length) return [];
+    const tf = new Intl.DateTimeFormat(i18n.language, { hour: '2-digit', minute: '2-digit' });
+    return product.priceHistory.map((entry) => ({
+      time: tf.format(entry.timestamp),
+      price: entry.price,
+    }));
+  }, [product, i18n.language]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
-        <p className="text-gray-600">Загрузка…</p>
+        <p className="text-gray-600">{t('productDetail.loading')}</p>
       </div>
     );
   }
@@ -123,9 +132,9 @@ export function ProductDetailNew() {
   if (!product) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 p-8">
-        <p className="text-gray-600">Товар не найден</p>
+        <p className="text-gray-600">{t('productDetail.notFound')}</p>
         <Link to="/catalog" className="text-emerald-600 font-medium hover:underline">
-          В каталог
+          {t('productDetail.toCatalog')}
         </Link>
       </div>
     );
@@ -146,14 +155,6 @@ export function ProductDetailNew() {
       ? (product.oldPrice - currentPrice) * quantity
       : 0;
 
-  const chartData = product.priceHistory.map((entry) => ({
-    time: entry.timestamp.toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    price: entry.price,
-  }));
-
   const handleAddToCart = () => {
     addToCart({
       productId: product.id,
@@ -161,10 +162,14 @@ export function ProductDetailNew() {
       image: product.image,
       quantity,
     });
-    toast.success('Добавлено в корзину', {
-      description: `${product.name} × ${quantity} шт`,
+    toast.success(t('productDetail.toastAdded'), {
+      description: t('productDetail.toastAddedDesc', {
+        name: product.name,
+        count: quantity,
+        units: t('productCard.unitsShort'),
+      }),
       action: {
-        label: 'Перейти',
+        label: t('productDetail.toastGoCart'),
         onClick: () => navigate('/cart'),
       },
     });
@@ -179,8 +184,8 @@ export function ProductDetailNew() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-700 hover:text-emerald-600 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="font-medium">Назад</span>
+            <ArrowLeft className="w-5 h-5" aria-hidden />
+            <span className="font-medium">{t('productDetail.backNav')}</span>
           </button>
         </div>
       </header>
@@ -212,8 +217,9 @@ export function ProductDetailNew() {
                       )
                     }
                     className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+                    aria-label={t('productDetail.carouselPrev')}
                   >
-                    <ChevronLeft className="w-6 h-6" />
+                    <ChevronLeft className="w-6 h-6" aria-hidden />
                   </button>
                   <button
                     type="button"
@@ -221,8 +227,9 @@ export function ProductDetailNew() {
                       setCurrentImageIndex((currentImageIndex + 1) % images.length)
                     }
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors shadow-lg"
+                    aria-label={t('productDetail.carouselNext')}
                   >
-                    <ChevronRight className="w-6 h-6" />
+                    <ChevronRight className="w-6 h-6" aria-hidden />
                   </button>
                 </>
               )}
@@ -238,8 +245,13 @@ export function ProductDetailNew() {
                     className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                       index === currentImageIndex ? 'border-emerald-600' : 'border-gray-200'
                     }`}
+                    aria-label={t('productDetail.chooseImage', { n: index + 1 })}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={img}
+                      alt={t('productDetail.thumbnailAlt', { n: index + 1 })}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -313,10 +325,11 @@ export function ProductDetailNew() {
                 </div>
                 <div className="space-y-3">
                   {product.wholesalePrices.map((tier, index) => (
-                    <motion.div
+                    <motion.button
                       key={index}
+                      type="button"
                       whileHover={{ scale: 1.02 }}
-                      className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                      className={`w-full text-left p-4 rounded-xl border-2 transition-all cursor-pointer ${
                         index === selectedTier
                           ? 'border-emerald-600 bg-gradient-to-r from-emerald-50 to-teal-50 shadow-lg shadow-emerald-500/20'
                           : 'border-gray-200 bg-white hover:border-gray-300'
@@ -348,7 +361,7 @@ export function ProductDetailNew() {
                           <div className="text-xs text-gray-500">{t('productDetail.perUnitInTier')}</div>
                         </div>
                       </div>
-                    </motion.div>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -362,6 +375,7 @@ export function ProductDetailNew() {
                     type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-12 h-12 rounded-xl border-2 border-gray-300 hover:border-emerald-600 hover:bg-emerald-50 transition-all flex items-center justify-center font-bold text-xl"
+                    aria-label={t('productDetail.ariaQtyMinus')}
                   >
                     −
                   </button>
@@ -378,6 +392,7 @@ export function ProductDetailNew() {
                     type="button"
                     onClick={() => setQuantity(quantity + 1)}
                     className="w-12 h-12 rounded-xl border-2 border-gray-300 hover:border-emerald-600 hover:bg-emerald-50 transition-all flex items-center justify-center font-bold text-xl"
+                    aria-label={t('productDetail.ariaQtyPlus')}
                   >
                     +
                   </button>
@@ -414,11 +429,12 @@ export function ProductDetailNew() {
                   type="button"
                   onClick={() => {
                     handleAddToCart();
-                    navigate('/cart');
+                    navigate('/checkout');
                   }}
                   className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-emerald-700 hover:to-emerald-600 transition-all shadow-lg shadow-emerald-500/30"
+                  title={t('productDetail.buyOneClickHint')}
                 >
-                  {t('productDetail.buyNow')}
+                  {t('productDetail.buyOneClick')}
                 </button>
               </div>
 

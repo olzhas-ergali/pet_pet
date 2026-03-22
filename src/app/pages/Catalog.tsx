@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useCategoryOptions } from '@/hooks/useCategoryOptions';
+import { filterProductsByCatalogRules } from '@/lib/catalog/catalogFilters';
 import { useTranslation } from 'react-i18next';
 import { SlidersHorizontal, Search, X } from 'lucide-react';
 import { ProductCardNew } from '../components/ProductCardNew';
@@ -7,7 +9,7 @@ import { BottomNav } from '../components/BottomNav';
 import { motion, AnimatePresence } from 'motion/react';
 import { useProductStore } from '@/store/productStore';
 import { Product } from '../types';
-import { CATEGORY_ALL, CATEGORY_ID_TO_DB, matchesCategoryFilter } from '@/lib/catalogCategories';
+import { CATEGORY_ALL } from '@/lib/catalogCategories';
 
 export function Catalog() {
   const { t } = useTranslation();
@@ -18,32 +20,25 @@ export function Catalog() {
 
   const products = useProductStore((s) => s.products);
   const loading = useProductStore((s) => s.loading);
+  const error = useProductStore((s) => s.error);
   const load = useProductStore((s) => s.load);
   const pricePulseAt = useProductStore((s) => s.pricePulseAt);
 
-  const categoryOptions = useMemo(
-    () => [
-      { id: CATEGORY_ALL, label: t('catalog.category.all') },
-      ...Object.keys(CATEGORY_ID_TO_DB).map((id) => ({
-        id,
-        label: t(`catalog.category.${id}`),
-      })),
-    ],
-    [t]
-  );
+  const categoryOptions = useCategoryOptions();
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = matchesCategoryFilter(product.category, selectedCategory);
-    const matchesPrice =
-      product.currentPrice >= priceRange[0] && product.currentPrice <= priceRange[1];
-
-    return matchesSearch && matchesCategory && matchesPrice;
-  });
+  const filteredProducts = useMemo(
+    () =>
+      filterProductsByCatalogRules(products, {
+        searchQuery,
+        selectedCategory,
+        priceRange,
+      }),
+    [products, searchQuery, selectedCategory, priceRange]
+  );
 
   const resetFilters = () => {
     setSearchQuery('');
@@ -71,8 +66,9 @@ export function Catalog() {
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label={t('catalog.clearSearch')}
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden />
               </button>
             )}
           </div>
@@ -87,6 +83,20 @@ export function Catalog() {
           </button>
         </div>
       </header>
+
+      {error && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-950 text-center py-3 px-4 text-sm">
+          <p className="font-medium">{t('catalog.loadError')}</p>
+          <p className="text-amber-800/90 mt-1">{error}</p>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="mt-2 text-sm font-semibold text-emerald-700 underline"
+          >
+            {t('catalog.loadErrorRetry')}
+          </button>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-6">
         <AnimatePresence>

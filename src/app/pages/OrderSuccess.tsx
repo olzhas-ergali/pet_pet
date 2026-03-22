@@ -5,11 +5,13 @@ import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 import { BottomNav } from '../components/BottomNav';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { fetchMyOrders } from '@/lib/api/orders';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 
 type VerifyState = 'idle' | 'loading' | 'ok' | 'fail' | 'skip';
 
 export function OrderSuccess() {
   const { t } = useTranslation();
+  const p = useLocalizedPath();
   const [params] = useSearchParams();
   const orderId = params.get('id') ?? '';
   const [verify, setVerify] = useState<VerifyState>('idle');
@@ -72,13 +74,13 @@ export function OrderSuccess() {
 
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
           <Link
-            to="/catalog"
+            to={p('/catalog')}
             className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-emerald-600 text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50"
           >
             {t('orderSuccess.toCatalog')}
           </Link>
           <Link
-            to="/profile"
+            to={p('/profile')}
             className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl font-semibold"
           >
             {t('orderSuccess.orders')}

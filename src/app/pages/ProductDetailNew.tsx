@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router';
+import { useParams, Link, useNavigate, useLocation } from 'react-router';
 import {
   ArrowLeft,
   TrendingDown,
@@ -28,11 +28,15 @@ import { useCartStore } from '@/store/cartStore';
 import { resolveUnitPrice } from '@/lib/pricing';
 import { isBffEnabled } from '@/lib/api/bff';
 import { fetchPricingQuote } from '@/lib/api/pricing';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
+import { applyProductDetailSeo } from '@/lib/seoTitles';
 
 export function ProductDetailNew() {
   const { t, i18n } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const p = useLocalizedPath();
   const fmt = (n: number) => `${formatNumberAmount(n, i18n.language)} ${t('common.currency')}`;
   const dateLocale = getDateFnsLocale(i18n.language);
   const addToCart = useCartStore((s) => s.addToCart);
@@ -88,6 +92,11 @@ export function ProductDetailNew() {
   }, [id, merged, commitProduct]);
 
   useEffect(() => {
+    if (loading || !product?.name) return;
+    applyProductDetailSeo(product.name, location.pathname, t);
+  }, [loading, product?.id, product?.name, location.pathname, t]);
+
+  useEffect(() => {
     if (!product) return;
     const tier = product.wholesalePrices.findIndex(
       (t) => quantity >= t.min && quantity <= t.max
@@ -133,7 +142,7 @@ export function ProductDetailNew() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 p-8">
         <p className="text-gray-600">{t('productDetail.notFound')}</p>
-        <Link to="/catalog" className="text-emerald-600 font-medium hover:underline">
+        <Link to={p('/catalog')} className="text-emerald-600 font-medium hover:underline">
           {t('productDetail.toCatalog')}
         </Link>
       </div>
@@ -170,7 +179,7 @@ export function ProductDetailNew() {
       }),
       action: {
         label: t('productDetail.toastGoCart'),
-        onClick: () => navigate('/cart'),
+        onClick: () => navigate(p('/cart')),
       },
     });
   };
@@ -429,7 +438,7 @@ export function ProductDetailNew() {
                   type="button"
                   onClick={() => {
                     handleAddToCart();
-                    navigate('/checkout');
+                    navigate(p('/checkout'));
                   }}
                   className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-emerald-700 hover:to-emerald-600 transition-all shadow-lg shadow-emerald-500/30"
                   title={t('productDetail.buyOneClickHint')}

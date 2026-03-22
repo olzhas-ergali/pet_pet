@@ -19,9 +19,9 @@ function schedulePriceToast() {
 }
 
 // Подписка на все изменения prices → стор (INSERT/UPDATE; DELETE редок — полный reload при необходимости)
-export function usePricesRealtime() {
+export function usePricesRealtime(enabled = true) {
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
+    if (!enabled || !isSupabaseConfigured) return;
     const supabase = getSupabase()!;
     const ch = supabase
       .channel('prices_stream')
@@ -58,7 +58,8 @@ export function usePricesRealtime() {
         }
       });
     return () => {
+      useRealtimeStore.getState().setPricesChannel('idle');
       void supabase.removeChannel(ch);
     };
-  }, []);
+  }, [enabled]);
 }

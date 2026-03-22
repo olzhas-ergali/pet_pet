@@ -7,13 +7,14 @@ import i18n from '@/i18n';
 
 /**
  * Подписка на изменения заказов (RLS: свой заказ, заказы с товарами поставщика, админ — все).
+ * @param enabled — как у usePricesRealtime: не подписываться, пока нет сессии / не готов layout.
  */
-export function useOrdersRealtime() {
+export function useOrdersRealtime(enabled = true) {
   const user = useAuthStore((s) => s.user);
   const toastDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !user) return;
+    if (!enabled || !isSupabaseConfigured || !user) return;
     const supabase = getSupabase()!;
     const ch = supabase
       .channel(`orders_feed_${user.id}`)
@@ -22,7 +23,8 @@ export function useOrdersRealtime() {
         { event: '*', schema: 'public', table: 'orders' },
         () => {
           useOrderFeedStore.getState().bump();
-          if (user?.role === 'admin') return;
+          const role = useAuthStore.getState().user?.role;
+          if (role === 'admin') return;
           if (toastDebounce.current) clearTimeout(toastDebounce.current);
           toastDebounce.current = setTimeout(() => {
             toast.info(i18n.t('realtime.ordersSynced'));
@@ -40,5 +42,5 @@ export function useOrdersRealtime() {
       if (toastDebounce.current) clearTimeout(toastDebounce.current);
       void supabase.removeChannel(ch);
     };
-  }, [user?.id, user?.role]);
+  }, [enabled, user?.id, user?.role]);
 }

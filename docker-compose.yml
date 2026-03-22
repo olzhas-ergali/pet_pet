@@ -22,6 +22,11 @@ services:
         VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:-}
     ports:
       - "8080:80"
+    environment:
+      PORT: "80"
+      BFF_UPSTREAM: bff:3001
+    depends_on:
+      - bff
     restart: unless-stopped
 
   # Только Postgres без Supabase: миграции из `supabase/migrations/` не применятся как есть

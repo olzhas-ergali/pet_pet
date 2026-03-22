@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 import { useTranslation } from 'react-i18next';
 import { TrendingDown, Clock, Package, Zap, Flame } from 'lucide-react';
 import { Product } from '../types';
@@ -18,6 +19,7 @@ interface ProductCardNewProps {
 
 export function ProductCardNew({ product, priceBumpAt }: ProductCardNewProps) {
   const { t, i18n } = useTranslation();
+  const p = useLocalizedPath();
   const [bump, setBump] = useState(false);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export function ProductCardNew({ product, priceBumpAt }: ProductCardNewProps) {
   const dateLocale = getDateFnsLocale(i18n.language);
 
   return (
-    <Link to={`/product/${product.id}`}>
+    <Link to={p(`/product/${product.id}`)}>
       <motion.div
         whileHover={{ y: -4 }}
         transition={{ duration: 0.2 }}

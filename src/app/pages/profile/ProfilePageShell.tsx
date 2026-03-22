@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 import { BottomNav } from '../../components/BottomNav';
 
 type Props = {
@@ -10,12 +11,13 @@ type Props = {
 
 export function ProfilePageShell({ title, children }: Props) {
   const { t } = useTranslation();
+  const p = useLocalizedPath();
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 pb-20">
       <header className="bg-white dark:bg-zinc-900 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-zinc-800">
         <div className="container mx-auto px-4 py-4 max-w-lg">
           <Link
-            to="/profile"
+            to={p('/profile')}
             className="inline-flex items-center gap-2 text-emerald-600 font-medium text-sm hover:underline mb-2"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden />

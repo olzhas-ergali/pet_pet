@@ -16,12 +16,14 @@ import { isBffEnabled } from '@/lib/api/bff';
 import { fetchCartQuoteWithMeta, type CartQuote } from '@/lib/api/pricing';
 import { formatNumberAmount } from '@/i18n/format';
 import { loadShippingDefaults, saveShippingDefaults } from '@/lib/shippingDefaults';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 
 type Phase = 'idle' | 'validating' | 'submitting' | 'error';
 
 export function Checkout() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const p = useLocalizedPath();
   const fmt = (n: number) => `${formatNumberAmount(n, i18n.language)} ${t('common.currency')}`;
 
   const items = useCartStore((s) => s.items);
@@ -173,7 +175,7 @@ export function Checkout() {
         city: city.trim(),
       });
       toast.success(t('checkout.toastSuccess'));
-      navigate(`/order-success?id=${encodeURIComponent(id)}`, { replace: true });
+      navigate(`${p('/order-success')}?id=${encodeURIComponent(id)}`, { replace: true });
       setPhase('idle');
     } catch (err) {
       setPhase('error');
@@ -188,7 +190,7 @@ export function Checkout() {
       <div className="min-h-screen bg-gray-50 pb-20">
         <header className="bg-white sticky top-0 z-30 shadow-sm">
           <div className="container mx-auto px-4 py-4">
-            <Link to="/cart" className="text-emerald-600 font-medium">
+            <Link to={p('/cart')} className="text-emerald-600 font-medium">
               {t('checkout.backToCart')}
             </Link>
             <h1 className="text-2xl font-bold mt-2">{t('checkout.title')}</h1>
@@ -200,13 +202,13 @@ export function Checkout() {
           <p className="text-gray-500 mb-8 text-sm leading-relaxed">{t('checkout.emptyHint')}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              to="/catalog"
+              to={p('/catalog')}
               className="inline-flex justify-center items-center rounded-2xl bg-emerald-600 text-white font-semibold px-6 py-3 hover:bg-emerald-700 transition-colors"
             >
               {t('cart.toCatalog')}
             </Link>
             <Link
-              to="/cart"
+              to={p('/cart')}
               className="inline-flex justify-center items-center rounded-2xl border-2 border-gray-200 font-semibold px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               {t('checkout.backToCart')}
@@ -261,7 +263,7 @@ export function Checkout() {
         {checkoutHardBlock && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
             <p className="font-medium">{t('cart.productMissing')}</p>
-            <Link to="/cart" className="mt-2 inline-block font-semibold text-emerald-700 underline">
+            <Link to={p('/cart')} className="mt-2 inline-block font-semibold text-emerald-700 underline">
               {t('checkout.backToCart')}
             </Link>
           </div>

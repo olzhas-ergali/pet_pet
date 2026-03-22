@@ -4,25 +4,22 @@ import { router } from './routes';
 import { Toaster } from './components/ui/sonner';
 import { useAuthStore } from '@/store/authStore';
 import { ThemeSync } from './components/ThemeSync';
-import { usePricesRealtime } from '@/hooks/usePricesRealtime';
-import { useOrdersRealtime } from '@/hooks/useOrdersRealtime';
+import { AppErrorBoundary } from './components/AppErrorBoundary';
 
 function AppBootstrap() {
   useEffect(() => {
     void useAuthStore.getState().bootstrap();
   }, []);
-  usePricesRealtime();
-  useOrdersRealtime();
   return null;
 }
 
 export default function App() {
   return (
-    <>
+    <AppErrorBoundary>
       <ThemeSync />
       <AppBootstrap />
       <RouterProvider router={router} />
       <Toaster position="top-right" />
-    </>
+    </AppErrorBoundary>
   );
 }

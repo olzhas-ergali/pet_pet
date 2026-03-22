@@ -3,7 +3,29 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
+/**
+ * Строгий CSP для прод-сборки (npm run build && npm run preview).
+ * `npm run dev` намеренно без CSP: HMR Vite использует inline/eval.
+ * В проде заголовок дублируется в nginx.conf.
+ */
+const PRODUCTION_CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com data:",
+  "img-src 'self' data: https: blob:",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://fonts.googleapis.com",
+  "frame-ancestors 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ')
+
 export default defineConfig({
+  preview: {
+    headers: {
+      'Content-Security-Policy': PRODUCTION_CSP,
+    },
+  },
   server: {
     proxy: {
       '/api': {

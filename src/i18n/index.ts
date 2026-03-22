@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import type { DetectorOptions } from 'i18next-browser-languagedetector';
 
 import ru from './locales/ru.json';
 import en from './locales/en.json';
@@ -15,7 +16,24 @@ const resources = {
   en: { translation: en },
 } as const;
 
-i18n.use(LanguageDetector).use(initReactI18next).init({
+/** Первый сегмент URL /en/... — приоритетнее localStorage при первой загрузке. */
+const pathSegmentDetector = {
+  name: 'pathSegment',
+  lookup(_options: DetectorOptions): string | undefined {
+    if (typeof window === 'undefined') return undefined;
+    const seg = window.location.pathname.split('/').filter(Boolean)[0];
+    if (seg && (SUPPORTED_LANGUAGES as readonly string[]).includes(seg)) {
+      return seg;
+    }
+    return undefined;
+  },
+  cacheUserLanguage() {},
+};
+
+const languageDetector = new LanguageDetector();
+languageDetector.addDetector(pathSegmentDetector);
+
+i18n.use(languageDetector).use(initReactI18next).init({
     resources,
     /** kk → недостающие ключи из ru; en → сначала en, затем ru; остальное → ru */
     fallbackLng: {
@@ -26,7 +44,7 @@ i18n.use(LanguageDetector).use(initReactI18next).init({
     supportedLngs: [...SUPPORTED_LANGUAGES],
     interpolation: { escapeValue: false },
     detection: {
-      order: ['localStorage', 'navigator'],
+      order: ['pathSegment', 'localStorage', 'navigator'],
       caches: ['localStorage'],
       lookupLocalStorage: 'optbirja-lang',
     },

@@ -1,6 +1,7 @@
-# VPS / bare-metal. Docker-образ фронта: nginx.default.conf.template + PORT и BFF_UPSTREAM (см. Dockerfile).
+# Подставляется entrypoint образа nginx (envsubst): PORT, BFF_UPSTREAM.
+# Локально / VPS без Docker — см. nginx.conf (listen 80, proxy на 127.0.0.1:3001).
 server {
-  listen 80;
+  listen ${PORT};
   server_name _;
   root /usr/share/nginx/html;
   index index.html;
@@ -9,9 +10,9 @@ server {
   # Если фронт ходит на внешний VITE_API_BASE_URL или коллектор аналитики — добавьте хосты в connect-src.
   add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://fonts.googleapis.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';" always;
 
-  # BFF на том же хосте (BFF_PORT, по умолчанию 3001). В docker-compose см. BFF_UPSTREAM в сервисе web.
+  # BFF: Docker Compose — BFF_UPSTREAM=bff:3001; один контейнер / VPS — 127.0.0.1:3001
   location /api/ {
-    proxy_pass http://127.0.0.1:3001;
+    proxy_pass http://${BFF_UPSTREAM};
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;

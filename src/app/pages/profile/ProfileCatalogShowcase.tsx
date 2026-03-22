@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 import { Filter } from 'lucide-react';
 
 type ShowcaseItem = {
@@ -13,41 +14,42 @@ type ShowcaseItem = {
 /** Примеры групп товаров с фото — ссылки в каталог с отбором (категория или поиск). */
 export function ProfileCatalogShowcase() {
   const { t } = useTranslation();
+  const p = useLocalizedPath();
 
   const items: ShowcaseItem[] = useMemo(() => {
     const bev = encodeURIComponent(t('profile.showcase.searchBeverages'));
     const pack = encodeURIComponent(t('profile.showcase.searchPackaging'));
     return [
       {
-        to: '/catalog?cat=food',
+        to: p('/catalog?cat=food'),
         title: t('catalog.category.food'),
         hint: t('profile.showcase.hintCategory'),
         image:
           'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=640&q=80&auto=format&fit=crop',
       },
       {
-        to: '/catalog?cat=home_chemistry',
+        to: p('/catalog?cat=home_chemistry'),
         title: t('catalog.category.home_chemistry'),
         hint: t('profile.showcase.hintCategory'),
         image:
           'https://images.unsplash.com/photo-1584622650111-993a426bbf3f?w=640&q=80&auto=format&fit=crop',
       },
       {
-        to: `/catalog?q=${bev}`,
+        to: p(`/catalog?q=${bev}`),
         title: t('profile.showcase.demoBeveragesTitle'),
         hint: t('profile.showcase.hintSearch'),
         image:
           'https://images.unsplash.com/photo-1544145945-a9c6a9d29fab?w=640&q=80&auto=format&fit=crop',
       },
       {
-        to: `/catalog?q=${pack}`,
+        to: p(`/catalog?q=${pack}`),
         title: t('profile.showcase.demoPackagingTitle'),
         hint: t('profile.showcase.hintSearch'),
         image:
           'https://images.unsplash.com/photo-1603914580074-57b70408f832?w=640&q=80&auto=format&fit=crop',
       },
     ];
-  }, [t]);
+  }, [t, p]);
 
   return (
     <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden">

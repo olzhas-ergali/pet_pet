@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { TrendingUp, ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { toast } from 'sonner';
-import { sendPhoneOtp, verifyPhoneOtp, devEmailSignIn } from '@/lib/api/auth';
+import {
+  applySignupRoleFromStorage,
+  devEmailSignIn,
+  PREFER_SUPPLIER_PORTAL_KEY,
+  sendPhoneOtp,
+  SIGNUP_ROLE_STORAGE_KEY,
+  verifyPhoneOtp,
+  type SignupAccountType,
+} from '@/lib/api/auth';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { useAuthStore } from '@/store/authStore';
 import { getPostLoginDestination } from '@/lib/auth/navigation';
@@ -17,6 +25,7 @@ import {
   formatRuNationalDisplay,
   ruE164FromNational,
 } from '@/lib/phone/ruMobile';
+import { useRouteLang } from '@/hooks/useLocalizedPath';
 
 const devEmail = import.meta.env.VITE_DEV_LOGIN_EMAIL;
 const devPassword = import.meta.env.VITE_DEV_LOGIN_PASSWORD;
@@ -38,18 +47,37 @@ export function Auth() {
   );
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const routeLang = useRouteLang();
   const user = useAuthStore((s) => s.user);
   const ready = useAuthStore((s) => s.ready);
+  const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const loginMockDemo = useAuthStore((s) => s.loginMockDemo);
+  const [accountType, setAccountType] = useState<SignupAccountType>('customer');
 
   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
   useEffect(() => {
+    const r = searchParams.get('role');
+    if (r === 'supplier') setAccountType('supplier');
+    else if (r === 'customer') setAccountType('customer');
+  }, [searchParams]);
+
+  useEffect(() => {
     if (!ready || !user) return;
     if (!isSupabaseConfigured && !isAuthMockEnabled()) return;
-    const dest = getPostLoginDestination(fromPath);
+    const preferSupplier =
+      typeof sessionStorage !== 'undefined' &&
+      sessionStorage.getItem(PREFER_SUPPLIER_PORTAL_KEY) === '1';
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem(PREFER_SUPPLIER_PORTAL_KEY);
+    }
+    let dest = getPostLoginDestination(fromPath, routeLang);
+    if (preferSupplier && user.role === 'supplier') {
+      dest = `/${routeLang}/supplier`;
+    }
     navigate(dest, { replace: true });
-  }, [ready, user, fromPath, navigate]);
+  }, [ready, user, fromPath, navigate, routeLang]);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +92,10 @@ export function Auth() {
     }
     setLoading(true);
     try {
-      await sendPhoneOtp(phoneE164);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(SIGNUP_ROLE_STORAGE_KEY, accountType);
+      }
+      await sendPhoneOtp(phoneE164, { accountType });
       setOtp('');
       setStep('otp');
       toast.success(t('auth.toastCodeSent'));
@@ -87,6 +118,11 @@ export function Auth() {
     setLoading(true);
     try {
       await verifyPhoneOtp(phoneE164, otp);
+      await applySignupRoleFromStorage();
+      if (accountType === 'supplier' && typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(PREFER_SUPPLIER_PORTAL_KEY, '1');
+      }
+      await refreshProfile();
       toast.success(t('auth.toastWelcome'));
     } catch (err) {
       toast.error(mapRpcUserMessage(err));
@@ -100,7 +136,15 @@ export function Auth() {
     if (!isSupabaseConfigured) return;
     setLoading(true);
     try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(SIGNUP_ROLE_STORAGE_KEY, accountType);
+      }
       await devEmailSignIn(devE, devP);
+      await applySignupRoleFromStorage();
+      if (accountType === 'supplier' && typeof sessionStorage !== 'undefined') {
+        sessionStorage.setItem(PREFER_SUPPLIER_PORTAL_KEY, '1');
+      }
+      await refreshProfile();
       toast.success(t('auth.toastDevOk'));
     } catch (err) {
       toast.error(mapRpcUserMessage(err));
@@ -110,6 +154,9 @@ export function Auth() {
   };
 
   const handleMockDemo = () => {
+    if (accountType === 'supplier') {
+      toast.info(t('auth.mockSupplierBody'));
+    }
     loginMockDemo();
     toast.success(t('auth.toastDemoMock'));
   };
@@ -146,7 +193,7 @@ export function Auth() {
           </motion.div>
           <p className="text-gray-600 dark:text-stone-300 text-lg mb-4">{t('auth.tagline')}</p>
           <Link
-            to="/"
+            to={`/${routeLang}`}
             className="text-sm text-amber-600 dark:text-amber-400/90 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
           >
             {t('auth.backToLanding')}
@@ -160,9 +207,10 @@ export function Auth() {
           className="bg-white dark:bg-stone-900/90 border border-gray-200 dark:border-white/10 backdrop-blur-md rounded-3xl p-8 space-y-6 shadow-xl shadow-gray-200/80 dark:shadow-2xl dark:shadow-black/40"
         >
           {!isSupabaseConfigured && (
-            <p className="text-sm text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3">
-              {t('auth.noEnv')}
-            </p>
+            <div className="text-sm text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3 space-y-2">
+              <p>{t('auth.noEnv')}</p>
+              <p className="text-xs leading-relaxed opacity-95">{t('auth.noEnvBff')}</p>
+            </div>
           )}
 
           {!isSupabaseConfigured && isAuthMockEnabled() && (
@@ -212,6 +260,47 @@ export function Auth() {
           {step === 'phone' ? (
             <form onSubmit={handlePhoneSubmit}>
               <div className="mb-6">
+                <p className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase tracking-wide mb-2">
+                  {t('auth.accountTypeLabel')}
+                </p>
+                <div className="grid grid-cols-2 gap-3 mb-1">
+                  <button
+                    type="button"
+                    onClick={() => setAccountType('customer')}
+                    className={`rounded-2xl border px-3 py-3 text-left transition-all ${
+                      accountType === 'customer'
+                        ? 'border-emerald-500/70 bg-emerald-50/90 dark:bg-emerald-500/15 ring-1 ring-emerald-500/40'
+                        : 'border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-stone-950/50 hover:border-gray-300 dark:hover:border-white/20'
+                    }`}
+                  >
+                    <span className="block text-sm font-semibold text-gray-900 dark:text-stone-100">
+                      {t('auth.accountBuyer')}
+                    </span>
+                    <span className="block text-xs text-gray-500 dark:text-stone-400 mt-1 leading-snug">
+                      {t('auth.accountBuyerHint')}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAccountType('supplier')}
+                    className={`rounded-2xl border px-3 py-3 text-left transition-all ${
+                      accountType === 'supplier'
+                        ? 'border-amber-500/70 bg-amber-50/90 dark:bg-amber-500/15 ring-1 ring-amber-500/40'
+                        : 'border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-stone-950/50 hover:border-gray-300 dark:hover:border-white/20'
+                    }`}
+                  >
+                    <span className="block text-sm font-semibold text-gray-900 dark:text-stone-100">
+                      {t('auth.accountSeller')}
+                    </span>
+                    <span className="block text-xs text-gray-500 dark:text-stone-400 mt-1 leading-snug">
+                      {t('auth.accountSellerHint')}
+                    </span>
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-stone-500 mt-2 leading-relaxed">{t('auth.accountTypeFoot')}</p>
+              </div>
+
+              <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-stone-300 mb-3">
                   {t('auth.phone')}
                 </label>
@@ -252,6 +341,9 @@ export function Auth() {
             </form>
           ) : (
             <form onSubmit={handleOtpSubmit}>
+              <p className="text-xs text-gray-500 dark:text-stone-400 mb-4 text-center">
+                {accountType === 'supplier' ? t('auth.otpAsSupplier') : t('auth.otpAsBuyer')}
+              </p>
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 dark:text-stone-300 mb-3">
                   {t('auth.otp')}
@@ -298,6 +390,11 @@ export function Auth() {
         <p className="text-center text-sm text-gray-500 dark:text-stone-500 mt-8 max-w-sm mx-auto leading-relaxed">
           {t('auth.terms')}
         </p>
+        {import.meta.env.DEV && (
+          <p className="text-center text-xs text-gray-400 dark:text-stone-600 mt-4 max-w-sm mx-auto leading-relaxed">
+            {t('auth.devFullStack')}
+          </p>
+        )}
       </motion.div>
       </div>
     </div>

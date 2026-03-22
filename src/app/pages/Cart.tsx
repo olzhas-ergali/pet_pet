@@ -12,9 +12,11 @@ import { resolveUnitPrice } from '@/lib/pricing';
 import { isBffEnabled } from '@/lib/api/bff';
 import { fetchCartQuoteWithMeta, type CartQuote } from '@/lib/api/pricing';
 import { formatNumberAmount } from '@/i18n/format';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 
 export function Cart() {
   const { t, i18n } = useTranslation();
+  const p = useLocalizedPath();
   const fmt = (n: number) => `${formatNumberAmount(n, i18n.language)} ${t('common.currency')}`;
 
   const items = useCartStore((s) => s.items);
@@ -132,7 +134,7 @@ export function Cart() {
           <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('cart.empty')}</h3>
           <p className="text-gray-500 mb-6">{t('cart.emptyHint')}</p>
           <Link
-            to="/catalog"
+            to={p('/catalog')}
             className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors"
           >
             {t('cart.toCatalog')}
@@ -390,7 +392,7 @@ export function Cart() {
             </div>
           ) : (
             <Link
-              to="/checkout"
+              to={p('/checkout')}
               className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 text-white py-4 rounded-2xl font-semibold text-lg hover:from-emerald-700 hover:to-emerald-600 transition-all shadow-lg shadow-emerald-500/30 flex items-center justify-center gap-2"
             >
               {t('cart.checkout')}

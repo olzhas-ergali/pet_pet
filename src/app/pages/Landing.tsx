@@ -6,17 +6,19 @@ import { motion } from 'motion/react';
 import { ArrowRight, Sparkles, Radio, Package, ShieldCheck, Truck } from 'lucide-react';
 import { toast } from 'sonner';
 import { CATEGORY_ID_TO_DB } from '@/lib/catalogCategories';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 
 export function Landing() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const p = useLocalizedPath();
   const authReady = useAuthStore((s) => s.ready);
   const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
-    if (authReady && user) navigate('/market', { replace: true });
-  }, [authReady, user, navigate]);
+    if (authReady && user) navigate(p('/market'), { replace: true });
+  }, [authReady, user, navigate, p]);
 
   const [partnerEmail, setPartnerEmail] = useState('');
   const [partnerNote, setPartnerNote] = useState('');
@@ -46,6 +48,13 @@ export function Landing() {
         <div className="absolute -top-40 -right-40 h-[480px] w-[480px] rounded-full bg-amber-400/20 dark:bg-amber-500/10 blur-3xl" />
         <div className="absolute bottom-0 -left-32 h-[420px] w-[420px] rounded-full bg-emerald-500/15 dark:bg-emerald-600/10 blur-3xl" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(0,0,0,0.04),_transparent_55%)] dark:bg-[radial-gradient(ellipse_at_top,_rgba(255,255,255,0.06),_transparent_55%)]" />
+        <div
+          className="absolute inset-0 opacity-[0.35] dark:opacity-[0.2] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          }}
+          aria-hidden
+        />
       </div>
 
       <header className="relative z-10 border-b border-gray-200/90 dark:border-white/5 bg-white/80 dark:bg-transparent backdrop-blur-md">
@@ -62,13 +71,13 @@ export function Landing() {
           <div className="flex items-center flex-wrap justify-end gap-2 sm:gap-3 min-w-0">
             <LanguageSwitcher className="[&_span]:text-gray-600 dark:[&_span]:text-stone-400 [&_select]:bg-white dark:[&_select]:bg-stone-900 [&_select]:text-gray-900 dark:[&_select]:text-stone-100 [&_select]:border-gray-200 dark:[&_select]:border-white/20 [&_svg]:text-gray-500 dark:[&_svg]:text-stone-400 shrink-0" />
             <Link
-              to="/auth"
+              to={p('/auth')}
               className="text-sm text-gray-600 hover:text-gray-900 dark:text-stone-400 dark:hover:text-white transition-colors px-3 py-2 whitespace-nowrap"
             >
               {t('landing.signIn')}
             </Link>
             <Link
-              to="/catalog"
+              to={p('/catalog')}
               className="text-sm font-semibold rounded-full bg-emerald-600 text-white dark:bg-white dark:text-stone-900 px-4 py-2.5 hover:bg-emerald-700 dark:hover:bg-stone-100 transition-colors shadow-md shadow-emerald-600/20 dark:shadow-black/20 whitespace-nowrap"
             >
               {t('landing.toCatalog')}
@@ -90,17 +99,21 @@ export function Landing() {
               {t('landing.liveBadge')}
             </p>
             <h1
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-gray-900 dark:text-white leading-[1.05] font-medium tracking-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-gray-900 dark:text-white leading-[1.05] font-medium tracking-tight drop-shadow-sm dark:drop-shadow-[0_1px_24px_rgba(0,0,0,0.35)]"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
             >
               {t('landing.heroTitle')}
             </h1>
+            <div className="mt-5 h-px w-24 bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full opacity-80" aria-hidden />
             <p className="mt-6 text-lg md:text-xl text-gray-600 dark:text-stone-400 max-w-2xl leading-relaxed font-light">
               {t('landing.heroSubtitle')}
             </p>
+            <p className="mt-4 text-sm md:text-base text-gray-500 dark:text-stone-500 max-w-xl leading-relaxed border-l-2 border-amber-400/60 pl-4">
+              {t('landing.proofLine')}
+            </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <Link
-                to="/catalog"
+                to={p('/catalog')}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-semibold px-8 py-4 text-lg hover:opacity-95 transition-opacity shadow-xl shadow-emerald-500/25"
               >
                 {t('landing.ctaPrimary')}
@@ -113,6 +126,23 @@ export function Landing() {
                 <Sparkles className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                 {t('landing.ctaSecondary')}
               </a>
+            </div>
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+              <Link
+                to={p('/auth')}
+                className="text-emerald-700 dark:text-emerald-400 font-medium hover:underline underline-offset-4"
+              >
+                {t('landing.ctaBuyerAuth')}
+              </Link>
+              <span className="hidden sm:inline text-gray-300 dark:text-zinc-600" aria-hidden>
+                |
+              </span>
+              <Link
+                to={`${p('/auth')}?role=supplier`}
+                className="text-amber-700 dark:text-amber-400 font-medium hover:underline underline-offset-4"
+              >
+                {t('landing.ctaSellerAuth')}
+              </Link>
             </div>
           </motion.div>
         </section>
@@ -244,7 +274,7 @@ export function Landing() {
               </a>
             </div>
             <Link
-              to="/market"
+              to={p('/market')}
               className="text-amber-600 dark:text-amber-500/90 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
             >
               {t('landing.footerMarket')}

@@ -6,7 +6,8 @@ import { internalRouter } from './routes/internal.js';
 import { bffCorsOptions } from './lib/corsConfig.js';
 
 const app = express();
-const port = Number(process.env.BFF_PORT ?? 3001);
+// PaaS (Railway, Render, Fly) задаёт PORT; локально — BFF_PORT или 3001
+const port = Number(process.env.PORT ?? process.env.BFF_PORT ?? 3001);
 
 app.use(cors(bffCorsOptions()));
 app.use(express.json({ limit: '1mb' }));
@@ -28,6 +29,6 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(port, () => {
-  console.log(`bff listening on :${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`bff listening on 0.0.0.0:${port}`);
 });

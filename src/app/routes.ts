@@ -1,48 +1,76 @@
+import type { ComponentType } from 'react';
 import { createBrowserRouter } from 'react-router';
+import { LangLayout } from './layout/LangLayout';
 import { PublicLayout } from './layout/PublicLayout';
 import { ProtectedLayout } from './layout/ProtectedLayout';
+import { RootRedirect } from './pages/RootRedirect';
+import { WildcardLangRedirect } from './pages/WildcardLangRedirect';
 import { Auth } from './pages/Auth';
 import { Landing } from './pages/Landing';
-import { HomeNew } from './pages/HomeNew';
-import { Catalog } from './pages/Catalog';
-import { ProductDetailNew } from './pages/ProductDetailNew';
-import { Cart } from './pages/Cart';
-import { Profile } from './pages/Profile';
-import { Checkout } from './pages/Checkout';
-import { OrderSuccess } from './pages/OrderSuccess';
-import { Supplier } from './pages/Supplier';
-import { Admin } from './pages/Admin';
-import { ProfilePersonal } from './pages/profile/ProfilePersonal';
-import { ProfileAddresses } from './pages/profile/ProfileAddresses';
-import { ProfilePayment } from './pages/profile/ProfilePayment';
-import { ProfileNotifications } from './pages/profile/ProfileNotifications';
-import { ProfileSettings } from './pages/profile/ProfileSettings';
+import { RouteChunkFallback } from './components/RouteChunkFallback';
+
+function lazyPage<T extends Record<string, ComponentType<object>>>(
+  loader: () => Promise<T>,
+  exportName: keyof T & string,
+) {
+  return (): Promise<{
+    Component: ComponentType<object>;
+    HydrateFallback: typeof RouteChunkFallback;
+  }> =>
+    loader().then((mod) => ({
+      Component: mod[exportName],
+      HydrateFallback: RouteChunkFallback,
+    }));
+}
 
 export const router = createBrowserRouter([
+  { path: '/', Component: RootRedirect },
   {
-    Component: PublicLayout,
+    path: '/:lang',
+    Component: LangLayout,
     children: [
-      { path: '/', Component: Landing },
-      { path: '/auth', Component: Auth },
+      {
+        Component: PublicLayout,
+        children: [
+          { index: true, Component: Landing },
+          { path: 'auth', Component: Auth },
+        ],
+      },
+      {
+        Component: ProtectedLayout,
+        children: [
+          { path: 'market', lazy: lazyPage(() => import('./pages/HomeNew'), 'HomeNew') },
+          { path: 'catalog', lazy: lazyPage(() => import('./pages/Catalog'), 'Catalog') },
+          { path: 'product/:id', lazy: lazyPage(() => import('./pages/ProductDetailNew'), 'ProductDetailNew') },
+          { path: 'cart', lazy: lazyPage(() => import('./pages/Cart'), 'Cart') },
+          { path: 'checkout', lazy: lazyPage(() => import('./pages/Checkout'), 'Checkout') },
+          { path: 'order-success', lazy: lazyPage(() => import('./pages/OrderSuccess'), 'OrderSuccess') },
+          { path: 'profile', lazy: lazyPage(() => import('./pages/Profile'), 'Profile') },
+          {
+            path: 'profile/personal',
+            lazy: lazyPage(() => import('./pages/profile/ProfilePersonal'), 'ProfilePersonal'),
+          },
+          {
+            path: 'profile/addresses',
+            lazy: lazyPage(() => import('./pages/profile/ProfileAddresses'), 'ProfileAddresses'),
+          },
+          {
+            path: 'profile/payment',
+            lazy: lazyPage(() => import('./pages/profile/ProfilePayment'), 'ProfilePayment'),
+          },
+          {
+            path: 'profile/notifications',
+            lazy: lazyPage(() => import('./pages/profile/ProfileNotifications'), 'ProfileNotifications'),
+          },
+          {
+            path: 'profile/settings',
+            lazy: lazyPage(() => import('./pages/profile/ProfileSettings'), 'ProfileSettings'),
+          },
+          { path: 'supplier', lazy: lazyPage(() => import('./pages/Supplier'), 'Supplier') },
+          { path: 'admin', lazy: lazyPage(() => import('./pages/Admin'), 'Admin') },
+        ],
+      },
     ],
   },
-  {
-    Component: ProtectedLayout,
-    children: [
-      { path: '/market', Component: HomeNew },
-      { path: '/catalog', Component: Catalog },
-      { path: '/product/:id', Component: ProductDetailNew },
-      { path: '/cart', Component: Cart },
-      { path: '/checkout', Component: Checkout },
-      { path: '/order-success', Component: OrderSuccess },
-      { path: '/profile', Component: Profile },
-      { path: '/profile/personal', Component: ProfilePersonal },
-      { path: '/profile/addresses', Component: ProfileAddresses },
-      { path: '/profile/payment', Component: ProfilePayment },
-      { path: '/profile/notifications', Component: ProfileNotifications },
-      { path: '/profile/settings', Component: ProfileSettings },
-      { path: '/supplier', Component: Supplier },
-      { path: '/admin', Component: Admin },
-    ],
-  },
+  { path: '*', Component: WildcardLangRedirect },
 ]);

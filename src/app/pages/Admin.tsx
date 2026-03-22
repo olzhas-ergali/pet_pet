@@ -28,6 +28,7 @@ import {
 } from '@/lib/api/admin';
 import { updateProductPrice, updateProductStock } from '@/lib/api/supplier';
 import { mapRpcUserMessage } from '@/lib/api/orderErrors';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 import type { Product } from '../types';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { CATEGORY_ID_TO_DB } from '@/lib/catalogCategories';
@@ -38,6 +39,7 @@ type AdminTab = 'overview' | 'orders' | 'catalog' | 'suppliers' | 'broadcast' | 
 
 export function Admin() {
   const { t, i18n } = useTranslation();
+  const p = useLocalizedPath();
   const user = useAuthStore((s) => s.user);
   const [list, setList] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -134,7 +136,7 @@ export function Admin() {
   );
 
   if (!isAdmin) {
-    return <Navigate to="/catalog" replace />;
+    return <Navigate to={p('/catalog')} replace />;
   }
 
   return (

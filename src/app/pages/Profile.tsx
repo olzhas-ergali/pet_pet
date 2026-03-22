@@ -24,9 +24,11 @@ import { fetchMyOrders } from '@/lib/api/orders';
 import type { OrderRow } from '@/types/database';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
 import { useOrderFeedStore } from '@/store/orderFeedStore';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 
 export function Profile() {
   const { t, i18n } = useTranslation();
+  const p = useLocalizedPath();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const [orders, setOrders] = useState<OrderRow[]>([]);
@@ -56,13 +58,13 @@ export function Profile() {
 
   const menuItems = useMemo(
     () => [
-      { icon: User, label: t('profile.personal'), to: '/profile/personal' },
-      { icon: Settings, label: t('profile.settingsTitle'), to: '/profile/settings' },
-      { icon: MapPin, label: t('profile.addresses'), to: '/profile/addresses' },
-      { icon: CreditCard, label: t('profile.payment'), to: '/profile/payment' },
-      { icon: Bell, label: t('profile.notifications'), to: '/profile/notifications' },
+      { icon: User, label: t('profile.personal'), to: p('/profile/personal') },
+      { icon: Settings, label: t('profile.settingsTitle'), to: p('/profile/settings') },
+      { icon: MapPin, label: t('profile.addresses'), to: p('/profile/addresses') },
+      { icon: CreditCard, label: t('profile.payment'), to: p('/profile/payment') },
+      { icon: Bell, label: t('profile.notifications'), to: p('/profile/notifications') },
     ],
-    [t]
+    [t, p],
   );
 
   const roleLabel = useMemo(() => {
@@ -113,7 +115,7 @@ export function Profile() {
         >
           {showSupplierPortal ? (
             <Link
-              to="/supplier"
+              to={p('/supplier')}
               className="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800"
             >
               <Store className="w-8 h-8 text-emerald-600" />
@@ -122,7 +124,7 @@ export function Profile() {
           ) : null}
           {showAdminPortal ? (
             <Link
-              to="/admin"
+              to={p('/admin')}
               className="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800"
             >
               <Shield className="w-8 h-8 text-emerald-600" />
@@ -130,7 +132,7 @@ export function Profile() {
             </Link>
           ) : null}
           <Link
-            to="/catalog"
+            to={p('/catalog')}
             className={
               quickLinkSlots >= 3
                 ? 'bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800 col-span-2 sm:col-span-1'

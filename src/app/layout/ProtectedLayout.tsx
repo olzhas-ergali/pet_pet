@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { isSupabaseConfigured } from '@/lib/supabase/client';
+import { usePricesRealtime } from '@/hooks/usePricesRealtime';
+import { useOrdersRealtime } from '@/hooks/useOrdersRealtime';
 import { SessionSplash } from '../components/SessionSplash';
 import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { RealtimeStatusBanner } from '../components/RealtimeStatusBanner';
@@ -11,18 +13,24 @@ export function ProtectedLayout() {
   const { t } = useTranslation();
   const ready = useAuthStore((s) => s.ready);
   const user = useAuthStore((s) => s.user);
+
+  const canPriceRealtime = ready && Boolean(user) && isSupabaseConfigured;
+  usePricesRealtime(canPriceRealtime);
+  useOrdersRealtime(canPriceRealtime);
   const navigate = useNavigate();
   const loc = useLocation();
+  const { lang } = useParams<{ lang: string }>();
+  const authPath = lang ? `/${lang}/auth` : '/ru/auth';
 
   useEffect(() => {
     if (!ready || !isSupabaseConfigured) return;
     if (!user) {
-      navigate('/auth', {
+      navigate(authPath, {
         replace: true,
         state: { from: { pathname: loc.pathname + loc.search } },
       });
     }
-  }, [ready, user, loc.pathname, loc.search, navigate]);
+  }, [ready, user, loc.pathname, loc.search, navigate, authPath]);
 
   if (!ready) {
     return <SessionSplash />;

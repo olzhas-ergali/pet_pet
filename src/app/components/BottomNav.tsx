@@ -1,35 +1,43 @@
+import { useMemo } from 'react';
 import { Home, Search, ShoppingCart, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useCartStore, selectCartCount } from '@/store/cartStore';
+import { stripLangFromPath } from '@/i18n/langRouting';
+import { useLocalizedPath } from '@/hooks/useLocalizedPath';
 
 export function BottomNav() {
   const { t } = useTranslation();
   const location = useLocation();
+  const p = useLocalizedPath();
   const cartCount = useCartStore(selectCartCount);
+  const basePath = stripLangFromPath(location.pathname);
 
   const navItems: {
     icon: typeof Home;
     label: string;
-    path: string;
-    match?: (pathname: string) => boolean;
+    to: string;
+    match?: (logicalPath: string) => boolean;
     badge?: number;
-  }[] = [
-    { icon: Home, label: t('nav.home'), path: '/market' },
-    {
-      icon: Search,
-      label: t('nav.catalog'),
-      path: '/catalog',
-      match: (p) => p === '/catalog' || p.startsWith('/product/'),
-    },
-    { icon: ShoppingCart, label: t('nav.cart'), path: '/cart', badge: cartCount },
-    {
-      icon: User,
-      label: t('nav.profile'),
-      path: '/profile',
-      match: (p) => p === '/profile' || p.startsWith('/profile/'),
-    },
-  ];
+  }[] = useMemo(
+    () => [
+      { icon: Home, label: t('nav.home'), to: p('/market') },
+      {
+        icon: Search,
+        label: t('nav.catalog'),
+        to: p('/catalog'),
+        match: (bp) => bp === '/catalog' || bp.startsWith('/product/'),
+      },
+      { icon: ShoppingCart, label: t('nav.cart'), to: p('/cart'), badge: cartCount },
+      {
+        icon: User,
+        label: t('nav.profile'),
+        to: p('/profile'),
+        match: (bp) => bp === '/profile' || bp.startsWith('/profile/'),
+      },
+    ],
+    [t, p, cartCount],
+  );
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 z-40 md:hidden">
@@ -37,13 +45,13 @@ export function BottomNav() {
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = item.match
-            ? item.match(location.pathname)
-            : location.pathname === item.path;
+            ? item.match(basePath)
+            : basePath === stripLangFromPath(item.to);
 
           return (
             <Link
-              key={item.path}
-              to={item.path}
+              key={item.to}
+              to={item.to}
               className={`relative flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${
                 isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-zinc-400'
               }`}

@@ -16,6 +16,7 @@ import { ProfilePersonal } from './pages/profile/ProfilePersonal';
 import { ProfileAddresses } from './pages/profile/ProfileAddresses';
 import { ProfilePayment } from './pages/profile/ProfilePayment';
 import { ProfileNotifications } from './pages/profile/ProfileNotifications';
+import { ProfileSettings } from './pages/profile/ProfileSettings';
 
 export const router = createBrowserRouter([
   {
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       { path: '/profile/addresses', Component: ProfileAddresses },
       { path: '/profile/payment', Component: ProfilePayment },
       { path: '/profile/notifications', Component: ProfileNotifications },
+      { path: '/profile/settings', Component: ProfileSettings },
       { path: '/supplier', Component: Supplier },
       { path: '/admin', Component: Admin },
     ],

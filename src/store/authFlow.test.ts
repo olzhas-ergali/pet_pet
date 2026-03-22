@@ -7,5 +7,6 @@ describe('authStore (контракт)', () => {
     expect(typeof s.bootstrap).toBe('function');
     expect(typeof s.logout).toBe('function');
     expect(typeof s.refreshProfile).toBe('function');
+    expect(typeof s.loginMockDemo).toBe('function');
   });
 });

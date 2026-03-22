@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Navigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import {
   Shield,
@@ -132,6 +133,10 @@ export function Admin() {
     [list]
   );
 
+  if (!isAdmin) {
+    return <Navigate to="/catalog" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
       <header className="bg-white sticky top-0 z-30 shadow-sm">
@@ -145,14 +150,6 @@ export function Admin() {
       </header>
 
       <div className="container mx-auto px-4 py-4 max-w-4xl space-y-4">
-        {!isAdmin && (
-          <div className="bg-red-50 border border-red-200 text-red-900 rounded-2xl p-4 text-sm">
-            {t('admin.needRole')}
-          </div>
-        )}
-
-        {isAdmin && (
-          <>
             <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide md:flex-wrap">
               {tabs.map(({ id, icon: Icon, labelKey }) => (
                 <button
@@ -380,8 +377,6 @@ export function Admin() {
                 </div>
               )}
             </motion.div>
-          </>
-        )}
       </div>
 
       <BottomNav />

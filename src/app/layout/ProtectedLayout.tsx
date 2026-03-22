@@ -33,19 +33,19 @@ export function ProtectedLayout() {
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-zinc-100">
       {!isSupabaseConfigured && (
         <div className="bg-amber-500 text-white text-sm text-center py-2 px-4 z-50 relative">
           {t('protected.noSupabase')}
         </div>
       )}
-      <div className="sticky top-0 z-[60] border-b border-gray-100/80 bg-white/95 backdrop-blur-md shadow-sm">
+      <div className="sticky top-0 z-[60] border-b border-gray-200/90 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md shadow-sm">
         <RealtimeStatusBanner />
         <div className="flex justify-end items-center gap-2 px-3 py-2">
           <LanguageSwitcher />
         </div>
       </div>
       <Outlet />
-    </>
+    </div>
   );
 }

@@ -12,6 +12,7 @@ import {
   Store,
   Shield,
   RefreshCw,
+  Settings,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { BottomNav } from '../components/BottomNav';
@@ -56,6 +57,7 @@ export function Profile() {
   const menuItems = useMemo(
     () => [
       { icon: User, label: t('profile.personal'), to: '/profile/personal' },
+      { icon: Settings, label: t('profile.settingsTitle'), to: '/profile/settings' },
       { icon: MapPin, label: t('profile.addresses'), to: '/profile/addresses' },
       { icon: CreditCard, label: t('profile.payment'), to: '/profile/payment' },
       { icon: Bell, label: t('profile.notifications'), to: '/profile/notifications' },
@@ -71,14 +73,19 @@ export function Profile() {
 
   const totalSum = orders.reduce((s, o) => s + Number(o.total_amount), 0);
 
+  const showSupplierPortal = user?.role === 'supplier' || user?.role === 'admin';
+  const showAdminPortal = user?.role === 'admin';
+  const quickLinkSlots =
+    (showSupplierPortal ? 1 : 0) + (showAdminPortal ? 1 : 0) + 1; /* + каталог */
+
   const phoneLabel =
     user?.phone ??
     user?.email ??
     (isSupabaseConfigured ? t('profile.guest') : t('profile.noConnection'));
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-gradient-to-br from-emerald-600 to-emerald-500 text-white">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 pb-20">
+      <header className="bg-gradient-to-br from-emerald-600 to-emerald-500 text-white dark:from-emerald-700 dark:to-emerald-800">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-4">
@@ -95,52 +102,68 @@ export function Profile() {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-          <Link
-            to="/supplier"
-            className="bg-white rounded-2xl p-4 shadow-sm flex flex-col items-center gap-2 hover:bg-gray-50"
-          >
-            <Store className="w-8 h-8 text-emerald-600" />
-            <span className="text-sm font-medium text-center">{t('profile.supplier')}</span>
-          </Link>
-          <Link
-            to="/admin"
-            className="bg-white rounded-2xl p-4 shadow-sm flex flex-col items-center gap-2 hover:bg-gray-50"
-          >
-            <Shield className="w-8 h-8 text-emerald-600" />
-            <span className="text-sm font-medium text-center">{t('profile.admin')}</span>
-          </Link>
+        <div
+          className={`grid gap-4 mb-6 w-full ${
+            quickLinkSlots >= 3
+              ? 'grid-cols-2 sm:grid-cols-3'
+              : quickLinkSlots === 2
+                ? 'grid-cols-2'
+                : 'grid-cols-1 max-w-sm mx-auto'
+          }`}
+        >
+          {showSupplierPortal ? (
+            <Link
+              to="/supplier"
+              className="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800"
+            >
+              <Store className="w-8 h-8 text-emerald-600" />
+              <span className="text-sm font-medium text-center">{t('profile.supplier')}</span>
+            </Link>
+          ) : null}
+          {showAdminPortal ? (
+            <Link
+              to="/admin"
+              className="bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800"
+            >
+              <Shield className="w-8 h-8 text-emerald-600" />
+              <span className="text-sm font-medium text-center">{t('profile.admin')}</span>
+            </Link>
+          ) : null}
           <Link
             to="/catalog"
-            className="bg-white rounded-2xl p-4 shadow-sm flex flex-col items-center gap-2 hover:bg-gray-50 sm:col-span-1 col-span-2"
+            className={
+              quickLinkSlots >= 3
+                ? 'bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800 col-span-2 sm:col-span-1'
+                : 'bg-white dark:bg-zinc-900 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-zinc-800 flex flex-col items-center gap-2 hover:bg-gray-50 dark:hover:bg-zinc-800'
+            }
           >
             <Package className="w-8 h-8 text-emerald-600" />
-            <span className="text-sm font-medium">{t('profile.catalog')}</span>
+            <span className="text-sm font-medium text-center">{t('profile.catalog')}</span>
           </Link>
         </div>
 
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
-            <div className="text-3xl font-bold text-emerald-600 mb-1">{orders.length}</div>
-            <div className="text-sm text-gray-500">{t('profile.ordersCount')}</div>
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 text-center shadow-sm border border-gray-100 dark:border-zinc-800">
+            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">{orders.length}</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-400">{t('profile.ordersCount')}</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
-            <div className="text-3xl font-bold text-emerald-600 mb-1">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 text-center shadow-sm border border-gray-100 dark:border-zinc-800">
+            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">
               {orders.length ? `${Math.min(40, orders.length * 3)}%` : '—'}
             </div>
-            <div className="text-sm text-gray-500">{t('profile.savings')}</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-400">{t('profile.savings')}</div>
           </div>
-          <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl p-4 text-center shadow-sm border border-gray-100 dark:border-zinc-800">
             <div className="text-3xl font-bold text-emerald-600 mb-1">
               {totalSum > 0 ? `${Math.round(totalSum / 1000)}k` : '—'}
             </div>
-            <div className="text-sm text-gray-500">{t('profile.sum')}</div>
+            <div className="text-sm text-gray-500 dark:text-zinc-400">{t('profile.sum')}</div>
           </div>
         </div>
-        <p className="text-xs text-gray-400 mb-4">{t('profile.demoHint')}</p>
+        <p className="text-xs text-gray-400 dark:text-zinc-500 mb-4">{t('profile.demoHint')}</p>
 
-        <div className="bg-white rounded-2xl shadow-sm p-4 mb-6">
-          <h2 className="font-semibold mb-3">{t('profile.recentOrders')}</h2>
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 p-4 mb-6">
+          <h2 className="font-semibold mb-3 text-gray-900 dark:text-zinc-100">{t('profile.recentOrders')}</h2>
           {ordersLoading ? (
             <div className="space-y-3">
               <Skeleton className="h-14 w-full rounded-xl" />
@@ -197,21 +220,21 @@ export function Profile() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 overflow-hidden mb-6">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className={`w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition-colors text-left ${
-                  index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
+                className={`w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left ${
+                  index !== menuItems.length - 1 ? 'border-b border-gray-100 dark:border-zinc-800' : ''
                 }`}
               >
-                <div className="p-2 bg-gray-100 rounded-xl">
-                  <Icon className="w-5 h-5 text-gray-600" />
+                <div className="p-2 bg-gray-100 dark:bg-zinc-800 rounded-xl">
+                  <Icon className="w-5 h-5 text-gray-600 dark:text-zinc-300" />
                 </div>
-                <span className="flex-1 font-medium text-gray-900">{item.label}</span>
+                <span className="flex-1 font-medium text-gray-900 dark:text-zinc-100">{item.label}</span>
                 <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" aria-hidden />
               </Link>
             );
@@ -221,7 +244,7 @@ export function Profile() {
         <button
           type="button"
           onClick={() => void logout()}
-          className="w-full bg-white text-red-600 py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 hover:bg-red-50 transition-colors shadow-sm"
+          className="w-full bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 text-red-600 py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shadow-sm"
         >
           <LogOut className="w-5 h-5" />
           {t('profile.logout')}

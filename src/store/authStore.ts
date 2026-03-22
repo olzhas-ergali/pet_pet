@@ -3,6 +3,11 @@ import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabase/client';
 import { fetchProfile, signOut as apiSignOut, type AuthUserView } from '@/lib/api/auth';
 import { useCartStore } from '@/store/cartStore';
+import {
+  MOCK_DEMO_USER,
+  MOCK_SESSION_KEY,
+  isAuthMockEnabled,
+} from '@/lib/auth/mockSession';
 
 type AuthState = {
   ready: boolean;
@@ -10,6 +15,7 @@ type AuthState = {
   bootstrap: () => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  loginMockDemo: () => void;
 };
 
 let authListenerAttached = false;
@@ -41,6 +47,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   bootstrap: async () => {
     if (!isSupabaseConfigured) {
+      if (
+        isAuthMockEnabled() &&
+        typeof sessionStorage !== 'undefined' &&
+        sessionStorage.getItem(MOCK_SESSION_KEY) === '1'
+      ) {
+        set({ user: MOCK_DEMO_USER, ready: true });
+        return;
+      }
       set({ ready: true, user: null });
       return;
     }
@@ -79,8 +93,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: async () => {
+    if (
+      isAuthMockEnabled() &&
+      typeof sessionStorage !== 'undefined' &&
+      sessionStorage.getItem(MOCK_SESSION_KEY) === '1'
+    ) {
+      sessionStorage.removeItem(MOCK_SESSION_KEY);
+      useCartStore.getState().clearCart();
+      set({ user: null });
+      return;
+    }
     await apiSignOut();
     useCartStore.getState().clearCart();
     set({ user: null });
+  },
+
+  loginMockDemo: () => {
+    if (!isAuthMockEnabled() || isSupabaseConfigured) return;
+    sessionStorage.setItem(MOCK_SESSION_KEY, '1');
+    set({ user: MOCK_DEMO_USER });
   },
 }));

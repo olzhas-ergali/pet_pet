@@ -16,8 +16,8 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
 
   return (
     <label className={`flex items-center gap-2 ${className}`}>
-      <Globe className="w-4 h-4 shrink-0 text-gray-500" aria-hidden />
-      <span className="hidden sm:inline text-sm text-gray-600">{t('language.label')}</span>
+      <Globe className="w-4 h-4 shrink-0 text-gray-500 dark:text-zinc-400" aria-hidden />
+      <span className="hidden sm:inline text-sm text-gray-600 dark:text-zinc-300">{t('language.label')}</span>
       <motion.div
         key={pulse}
         initial={{ opacity: 0.75, scale: 0.97 }}
@@ -25,7 +25,7 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
         transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       >
         <select
-          className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+          className="text-sm border border-gray-200 dark:border-zinc-600 rounded-xl px-3 py-2 bg-white dark:bg-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
           value={SUPPORTED_LANGUAGES.includes(current) ? current : 'ru'}
           onChange={(e) => void i18n.changeLanguage(e.target.value as AppLanguage)}
           aria-label={t('language.label')}

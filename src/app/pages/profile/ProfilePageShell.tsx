@@ -11,8 +11,8 @@ type Props = {
 export function ProfilePageShell({ title, children }: Props) {
   const { t } = useTranslation();
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-white sticky top-0 z-30 shadow-sm border-b border-gray-100">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 pb-20">
+      <header className="bg-white dark:bg-zinc-900 sticky top-0 z-30 shadow-sm border-b border-gray-100 dark:border-zinc-800">
         <div className="container mx-auto px-4 py-4 max-w-lg">
           <Link
             to="/profile"
@@ -21,10 +21,10 @@ export function ProfilePageShell({ title, children }: Props) {
             <ArrowLeft className="w-4 h-4" aria-hidden />
             {t('profile.backToProfile')}
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{title}</h1>
         </div>
       </header>
-      <div className="container mx-auto px-4 py-6 max-w-lg">{children}</div>
+      <div className="container mx-auto px-4 py-6 max-w-lg text-gray-900 dark:text-zinc-100">{children}</div>
       <BottomNav />
     </div>
   );

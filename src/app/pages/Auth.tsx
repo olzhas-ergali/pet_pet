@@ -10,29 +10,43 @@ import { useAuthStore } from '@/store/authStore';
 import { getPostLoginDestination } from '@/lib/auth/navigation';
 import { mapRpcUserMessage } from '@/lib/api/orderErrors';
 import { SessionSplash } from '../components/SessionSplash';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { isAuthMockEnabled } from '@/lib/auth/mockSession';
+import {
+  extractRuNationalDigits,
+  formatRuNationalDisplay,
+  ruE164FromNational,
+} from '@/lib/phone/ruMobile';
 
 const devEmail = import.meta.env.VITE_DEV_LOGIN_EMAIL;
 const devPassword = import.meta.env.VITE_DEV_LOGIN_PASSWORD;
-const showDevLogin = Boolean(devEmail && devPassword);
+/** В development форма видна всегда (с подставленными тестовыми значениями); в prod — только если заданы оба ключа в .env */
+const showDevLogin = import.meta.env.DEV || Boolean(devEmail && devPassword);
 
 export function Auth() {
   const { t } = useTranslation();
-  const [phone, setPhone] = useState('');
+  /** Национальная часть РФ без +7/8: 10 цифр, обычно 9XX… */
+  const [phoneNational, setPhoneNational] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [loading, setLoading] = useState(false);
-  const [devE, setDevE] = useState(devEmail ?? '');
-  const [devP, setDevP] = useState(devPassword ?? '');
+  const [devE, setDevE] = useState(
+    () => devEmail || (import.meta.env.DEV ? 'demo@optbirja.local' : '')
+  );
+  const [devP, setDevP] = useState(
+    () => devPassword || (import.meta.env.DEV ? 'demo123456' : '')
+  );
   const navigate = useNavigate();
   const location = useLocation();
   const user = useAuthStore((s) => s.user);
   const ready = useAuthStore((s) => s.ready);
+  const loginMockDemo = useAuthStore((s) => s.loginMockDemo);
 
   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
   useEffect(() => {
-    if (!ready || !isSupabaseConfigured) return;
-    if (!user) return;
+    if (!ready || !user) return;
+    if (!isSupabaseConfigured && !isAuthMockEnabled()) return;
     const dest = getPostLoginDestination(fromPath);
     navigate(dest, { replace: true });
   }, [ready, user, fromPath, navigate]);
@@ -43,9 +57,15 @@ export function Auth() {
       toast.error(t('auth.toastNoEnv'));
       return;
     }
+    const phoneE164 = ruE164FromNational(phoneNational);
+    if (!phoneE164) {
+      toast.error(t('auth.toastPhoneIncomplete'));
+      return;
+    }
     setLoading(true);
     try {
-      await sendPhoneOtp(phone);
+      await sendPhoneOtp(phoneE164);
+      setOtp('');
       setStep('otp');
       toast.success(t('auth.toastCodeSent'));
     } catch (err) {
@@ -57,9 +77,16 @@ export function Auth() {
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const phoneE164 = ruE164FromNational(phoneNational);
+    if (!phoneE164) {
+      toast.error(t('auth.toastPhoneIncomplete'));
+      setOtp('');
+      setStep('phone');
+      return;
+    }
     setLoading(true);
     try {
-      await verifyPhoneOtp(phone, otp);
+      await verifyPhoneOtp(phoneE164, otp);
       toast.success(t('auth.toastWelcome'));
     } catch (err) {
       toast.error(mapRpcUserMessage(err));
@@ -82,16 +109,27 @@ export function Auth() {
     }
   };
 
+  const handleMockDemo = () => {
+    loginMockDemo();
+    toast.success(t('auth.toastDemoMock'));
+  };
+
   if (!ready && isSupabaseConfigured) {
     return <SessionSplash />;
   }
 
-  if (ready && user && isSupabaseConfigured) {
+  if (ready && user && (isSupabaseConfigured || isAuthMockEnabled())) {
     return <SessionSplash />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 pt-20 pb-12 relative">
+    <div className="min-h-screen flex flex-col px-4 pb-12">
+      <div className="flex justify-end pt-4 pb-2">
+        <div className="rounded-full border border-gray-200 dark:border-white/10 bg-white/90 dark:bg-black/30 px-2 py-1 shadow-sm dark:shadow-none backdrop-blur-md">
+          <LanguageSwitcher className="[&_span]:text-gray-600 dark:[&_span]:text-stone-400 [&_select]:bg-white dark:[&_select]:bg-stone-900 [&_select]:text-gray-900 dark:[&_select]:text-stone-100 [&_select]:border-gray-200 dark:[&_select]:border-white/20 [&_svg]:text-gray-500 dark:[&_svg]:text-stone-400" />
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-center px-0 pt-4 pb-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -106,10 +144,10 @@ export function Auth() {
           >
             <TrendingUp className="w-10 h-10 text-stone-950" />
           </motion.div>
-          <p className="text-stone-300 text-lg mb-4">{t('auth.tagline')}</p>
+          <p className="text-gray-600 dark:text-stone-300 text-lg mb-4">{t('auth.tagline')}</p>
           <Link
             to="/"
-            className="text-sm text-amber-400/90 hover:text-amber-300 transition-colors"
+            className="text-sm text-amber-600 dark:text-amber-400/90 hover:text-amber-700 dark:hover:text-amber-300 transition-colors"
           >
             {t('auth.backToLanding')}
           </Link>
@@ -119,35 +157,52 @@ export function Auth() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-stone-900/85 border border-white/10 backdrop-blur-md rounded-3xl p-8 space-y-6 shadow-2xl shadow-black/40"
+          className="bg-white dark:bg-stone-900/90 border border-gray-200 dark:border-white/10 backdrop-blur-md rounded-3xl p-8 space-y-6 shadow-xl shadow-gray-200/80 dark:shadow-2xl dark:shadow-black/40"
         >
           {!isSupabaseConfigured && (
-            <p className="text-sm text-amber-200 bg-amber-500/15 border border-amber-500/30 rounded-xl p-3">
+            <p className="text-sm text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-xl p-3">
               {t('auth.noEnv')}
             </p>
           )}
 
+          {!isSupabaseConfigured && isAuthMockEnabled() && (
+            <div className="space-y-3 pb-4 border-b border-gray-200 dark:border-white/10">
+              <p className="text-xs font-semibold text-amber-700 dark:text-amber-400/90 uppercase">{t('auth.demoUiTitle')}</p>
+              <p className="text-xs text-gray-600 dark:text-stone-400 leading-relaxed">{t('auth.demoUiHint')}</p>
+              <button
+                type="button"
+                onClick={handleMockDemo}
+                className="w-full py-3 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-100 font-semibold hover:bg-amber-200 dark:hover:bg-amber-500/30 transition-colors"
+              >
+                {t('auth.demoUiButton')}
+              </button>
+            </div>
+          )}
+
           {showDevLogin && (
-            <form onSubmit={handleDevLogin} className="space-y-3 pb-4 border-b border-white/10">
-              <p className="text-xs font-semibold text-stone-400 uppercase">{t('auth.devLogin')}</p>
+            <form onSubmit={handleDevLogin} className="space-y-3 pb-4 border-b border-gray-200 dark:border-white/10">
+              <p className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase">{t('auth.devLogin')}</p>
+              {import.meta.env.DEV && (
+                <p className="text-xs text-gray-500 dark:text-stone-500 leading-relaxed">{t('auth.devLoginHint')}</p>
+              )}
               <input
                 type="email"
                 value={devE}
                 onChange={(e) => setDevE(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-stone-950 border border-white/15 text-stone-100 placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-stone-950 border border-gray-200 dark:border-white/15 text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
                 placeholder="Email"
               />
               <input
                 type="password"
                 value={devP}
                 onChange={(e) => setDevP(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-stone-950 border border-white/15 text-stone-100 placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-stone-950 border border-gray-200 dark:border-white/15 text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-500 focus:border-amber-500/50 focus:outline-none"
                 placeholder={t('auth.passwordPlaceholder')}
               />
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 rounded-xl bg-stone-100 text-stone-900 font-semibold hover:bg-white disabled:opacity-50 transition-colors"
+                className="w-full py-3 rounded-xl bg-gray-900 dark:bg-stone-100 text-white dark:text-stone-900 font-semibold hover:bg-gray-800 dark:hover:bg-white disabled:opacity-50 transition-colors"
               >
                 {t('auth.devLoginSubmit')}
               </button>
@@ -157,23 +212,33 @@ export function Auth() {
           {step === 'phone' ? (
             <form onSubmit={handlePhoneSubmit}>
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-stone-300 mb-3">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-stone-300 mb-3">
                   {t('auth.phone')}
                 </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+7 (___) ___-__-__"
-                  className="w-full px-5 py-4 bg-stone-950 border border-white/15 rounded-2xl focus:border-emerald-500/60 focus:outline-none transition-all text-lg text-stone-100 placeholder:text-stone-500"
-                  required
-                />
+                <div className="flex rounded-2xl border border-gray-200 dark:border-white/15 bg-gray-50 dark:bg-stone-950 overflow-hidden transition-colors focus-within:border-emerald-500/60 focus-within:ring-1 focus-within:ring-emerald-500/30">
+                  <span
+                    className="flex items-center px-4 bg-gray-100 dark:bg-stone-900/85 text-gray-500 dark:text-stone-400 border-r border-gray-200 dark:border-white/10 text-lg font-medium tabular-nums select-none shrink-0"
+                    aria-hidden
+                  >
+                    +7
+                  </span>
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    value={formatRuNationalDisplay(phoneNational)}
+                    onChange={(e) => setPhoneNational(extractRuNationalDigits(e.target.value))}
+                    placeholder={t('auth.phoneNationalPlaceholder')}
+                    aria-label={t('auth.phone')}
+                    className="flex-1 min-w-0 px-4 py-4 bg-transparent focus:outline-none text-lg text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-500"
+                  />
+                </div>
               </div>
 
               <button
                 type="submit"
                 disabled={loading || !isSupabaseConfigured}
-                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-stone-950 py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   t('auth.sending')
@@ -188,7 +253,7 @@ export function Auth() {
           ) : (
             <form onSubmit={handleOtpSubmit}>
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-stone-300 mb-3">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-stone-300 mb-3">
                   {t('auth.otp')}
                 </label>
                 <input
@@ -197,13 +262,16 @@ export function Auth() {
                   onChange={(e) => setOtp(e.target.value)}
                   placeholder="• • • • • •"
                   maxLength={8}
-                  className="w-full px-5 py-4 bg-stone-950 border border-white/15 rounded-2xl focus:border-emerald-500/60 focus:outline-none transition-all text-2xl tracking-widest text-center text-stone-100 placeholder:text-stone-600"
+                  className="w-full px-5 py-4 bg-gray-50 dark:bg-stone-950 border border-gray-200 dark:border-white/15 rounded-2xl focus:border-emerald-500/60 focus:outline-none transition-all text-2xl tracking-widest text-center text-gray-900 dark:text-stone-100 placeholder:text-gray-400 dark:placeholder:text-stone-600"
                   required
                 />
                 <button
                   type="button"
-                  onClick={() => setStep('phone')}
-                  className="text-sm text-stone-400 mt-3 hover:text-stone-200"
+                  onClick={() => {
+                    setOtp('');
+                    setStep('phone');
+                  }}
+                  className="text-sm text-gray-500 dark:text-stone-400 mt-3 hover:text-gray-800 dark:hover:text-stone-200"
                 >
                   {t('auth.changePhone')}
                 </button>
@@ -212,7 +280,7 @@ export function Auth() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-stone-950 py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-white py-4 rounded-2xl font-semibold text-lg hover:opacity-95 transition-opacity shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {loading ? (
                   t('auth.checking')
@@ -227,10 +295,11 @@ export function Auth() {
           )}
         </motion.div>
 
-        <p className="text-center text-sm text-stone-500 mt-8 max-w-sm mx-auto leading-relaxed">
+        <p className="text-center text-sm text-gray-500 dark:text-stone-500 mt-8 max-w-sm mx-auto leading-relaxed">
           {t('auth.terms')}
         </p>
       </motion.div>
+      </div>
     </div>
   );
 }

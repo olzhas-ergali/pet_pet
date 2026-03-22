@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router';
 import { useCategoryOptions } from '@/hooks/useCategoryOptions';
 import { filterProductsByCatalogRules } from '@/lib/catalog/catalogFilters';
 import { useTranslation } from 'react-i18next';
@@ -10,9 +11,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useProductStore } from '@/store/productStore';
 import { Product } from '../types';
 import { CATEGORY_ALL } from '@/lib/catalogCategories';
+import { parseCatalogSearchParams } from '@/lib/catalog/catalogUrlParams';
 
 export function Catalog() {
   const { t } = useTranslation();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_ALL);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200000]);
@@ -29,6 +32,12 @@ export function Catalog() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const { category, searchQuery } = parseCatalogSearchParams(location.search);
+    if (category) setSelectedCategory(category);
+    if (searchQuery) setSearchQuery(searchQuery);
+  }, [location.search]);
 
   const filteredProducts = useMemo(
     () =>

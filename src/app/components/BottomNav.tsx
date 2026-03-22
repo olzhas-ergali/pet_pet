@@ -32,7 +32,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-800 z-40 md:hidden">
       <div className="flex items-center justify-around py-2 safe-bottom">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -45,7 +45,7 @@ export function BottomNav() {
               key={item.path}
               to={item.path}
               className={`relative flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${
-                isActive ? 'text-emerald-600' : 'text-gray-500'
+                isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-zinc-400'
               }`}
             >
               <Icon className={`w-6 h-6 ${isActive ? 'fill-emerald-100' : ''}`} />

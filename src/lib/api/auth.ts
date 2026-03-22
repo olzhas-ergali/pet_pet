@@ -3,6 +3,9 @@ import type { ProfileRow, UserRole } from '@/types/database';
 
 function normalizePhone(raw: string): string {
   const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10 && digits.startsWith('9')) {
+    return `+7${digits}`;
+  }
   if (digits.startsWith('8') && digits.length === 11) {
     return `+7${digits.slice(1)}`;
   }

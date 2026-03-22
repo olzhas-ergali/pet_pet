@@ -57,20 +57,20 @@ export function HomeNew() {
     .slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 md:pb-8">
-      <header className="bg-white sticky top-0 z-30 shadow-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 pb-20 md:pb-8">
+      <header className="bg-white dark:bg-zinc-900 sticky top-0 z-30 shadow-sm border-b border-transparent dark:border-zinc-800">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <div className="h-9 w-36 rounded-lg bg-gray-100" aria-label="Logo" />
-              <p className="text-sm text-gray-500 mt-0.5">{t('home.tagline')}</p>
+              <div className="h-9 w-36 rounded-lg bg-gray-100 dark:bg-zinc-800" aria-label="Logo" />
+              <p className="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">{t('home.tagline')}</p>
             </div>
             <button
               type="button"
-              className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="relative p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
               aria-label={t('home.bellAria')}
             >
-              <Bell className="w-6 h-6 text-gray-700" aria-hidden />
+              <Bell className="w-6 h-6 text-gray-700 dark:text-zinc-200" aria-hidden />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" aria-hidden />
             </button>
           </div>
@@ -130,8 +130,8 @@ export function HomeNew() {
                   <Flame className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">{t('home.sectionHot')}</h2>
-                  <p className="text-sm text-gray-500">{t('home.sectionHotSub')}</p>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100">{t('home.sectionHot')}</h2>
+                  <p className="text-sm text-gray-500 dark:text-zinc-400">{t('home.sectionHotSub')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -153,8 +153,8 @@ export function HomeNew() {
                   <TrendingDown className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">{t('home.sectionDrop')}</h2>
-                  <p className="text-sm text-gray-500">{t('home.sectionDropSub')}</p>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100">{t('home.sectionDrop')}</h2>
+                  <p className="text-sm text-gray-500 dark:text-zinc-400">{t('home.sectionDropSub')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -176,8 +176,8 @@ export function HomeNew() {
                   <Package2 className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold">{t('home.sectionLow')}</h2>
-                  <p className="text-sm text-gray-500">{t('home.sectionLowSub')}</p>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-zinc-100">{t('home.sectionLow')}</h2>
+                  <p className="text-sm text-gray-500 dark:text-zinc-400">{t('home.sectionLowSub')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -230,11 +230,11 @@ export function HomeNew() {
 
         {!loading && filteredProducts.length === 0 && (
           <div className="text-center py-16">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Package2 className="w-12 h-12 text-gray-400" />
+            <div className="w-24 h-24 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Package2 className="w-12 h-12 text-gray-400 dark:text-zinc-500" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('home.notFound')}</h3>
-            <p className="text-gray-500">{t('home.notFoundHint')}</p>
+            <h3 className="text-xl font-semibold text-gray-700 dark:text-zinc-200 mb-2">{t('home.notFound')}</h3>
+            <p className="text-gray-500 dark:text-zinc-400">{t('home.notFoundHint')}</p>
           </div>
         )}
       </div>

@@ -5,6 +5,7 @@ import { Toaster } from './components/ui/sonner';
 import { useAuthStore } from '@/store/authStore';
 import { ThemeSync } from './components/ThemeSync';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
+import { Analytics } from '@vercel/analytics/react';
 
 function AppBootstrap() {
   useEffect(() => {
@@ -20,6 +21,7 @@ export default function App() {
       <AppBootstrap />
       <RouterProvider router={router} />
       <Toaster position="top-right" />
+      <Analytics />
     </AppErrorBoundary>
   );
 }

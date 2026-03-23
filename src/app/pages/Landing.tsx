@@ -97,8 +97,8 @@ export function Landing() {
             transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             className="max-w-4xl"
           >
-            <p className="inline-flex items-center gap-2 text-amber-600 dark:text-amber-400/90 text-sm font-medium mb-6">
-              <Radio className="w-4 h-4" aria-hidden />
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 dark:border-emerald-500/25 bg-emerald-50/80 dark:bg-emerald-500/10 px-3 py-1.5 text-emerald-800 dark:text-emerald-200/95 text-sm font-medium mb-6">
+              <Layers className="w-4 h-4 shrink-0 opacity-90" aria-hidden />
               {t('landing.liveBadge')}
             </p>
             <h1
